@@ -33,21 +33,27 @@ Users.init(
     },
     passwordRepeat: {
       type: DataTypes.VIRTUAL,
+      allowNull: false,
     },
     phone: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     address: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     photo: {
       type: DataTypes.STRING,
+      allowNull: true,
     },
     cardName: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
     cardNumber: {
       type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
