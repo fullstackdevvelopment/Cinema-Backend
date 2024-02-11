@@ -1,0 +1,37 @@
+{
+  "name": "cinema",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon -r dotenv/config app.js",
+    "migrate": "node -r dotenv/config migrate.js",
+    "prod": "nodemon -r dotenv/config app.js"
+  },
+  "dependencies": {
+    "bluebird": "^3.7.2",
+    "cls-hooked": "^4.2.2",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "http-errors": "^2.0.0",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "lodash": "^4.17.21",
+    "md5": "^2.3.0",
+    "moment": "^2.30.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.7.0",
+    "papaparse": "^5.4.1",
+    "sequelize": "^6.35.2",
+    "socket.io": "^4.7.4",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.29.1",
+    "nodemon": "^3.0.2"
+  }
+}
