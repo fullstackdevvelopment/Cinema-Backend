@@ -3,15 +3,11 @@ import fs from 'fs';
 import md5 from 'md5';
 import HttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
-import { Users, Cards, ResetToken } from '../models/index.js';
+import { Users, Cards } from '../models/index.js';
 
 const {
   USER_PASSWORD_HASH,
   USER_JWT_SECRET,
-  USER_RESET_PASSWORD_JWT_SECRET,
-  CLIENT_ID,
-  CLIENT_SECRET,
 } = process.env;
 
 class UserController {

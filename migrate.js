@@ -1,5 +1,5 @@
 import {
-  Users, Movies, Cards, Comments, Bookings, ResetToken,
+  Users, Movies, Cards, Comments, Bookings,
 } from './models/index.js';
 
 async function main() {
@@ -8,7 +8,6 @@ async function main() {
   await Movies.sync({ alter: true, logging: true });
   await Comments.sync({ alter: true, logging: true });
   await Bookings.sync({ alter: true, logging: true });
-  await ResetToken.sync({ alter: true, logging: true });
   process.exit(0);
 }
 
