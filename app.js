@@ -28,6 +28,7 @@ app.use(routes);
 
 app.use((req, res, next) => next(HttpError(404)));
 
+// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   res.status(+err.status || 500);
 
