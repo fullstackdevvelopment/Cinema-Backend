@@ -1,9 +1,9 @@
 import { DataTypes, Model } from 'sequelize';
 import sequelize from '../services/sequelize.js';
 
-class Users extends Model {}
+class Movies extends Model {}
 
-Users.init(
+Movies.init(
   {
     id: {
       type: DataTypes.BIGINT.UNSIGNED,
@@ -11,62 +11,60 @@ Users.init(
       autoIncrement: true,
       allowNull: false,
     },
-    firstName: {
+    title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    lastName: {
+    details: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    language: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    userName: {
+    releaseDate: {
+      type: DataTypes.DATE,
+      allowNull: false,
+    },
+    director: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    email: {
-      type: DataTypes.STRING,
+    storyLine: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
-    password: {
-      type: DataTypes.STRING,
+    rating: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
-    city: {
-      type: DataTypes.STRING,
+    voters: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
-    country: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    address: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    phone: {
+    trailer: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     photo: {
       type: DataTypes.STRING,
-      allowNull: true,
-    },
-    isAdmin: {
-      type: DataTypes.BOOLEAN,
       allowNull: false,
-      defaultValue: false,
+    },
+    actorPhoto: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    duration: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
     },
   },
   {
     sequelize,
-    tableName: 'users',
-    modelName: 'users',
-    indexes: [
-      { fields: ['userName'], unique: true },
-      { fields: ['email'], unique: true },
-      { fields: ['phone'], unique: true },
-    ],
+    tableName: 'movies',
+    modelName: 'movies',
   },
 );
 
-export default Users;
+export default Movies;

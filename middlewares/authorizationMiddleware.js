@@ -2,10 +2,13 @@ import jwt from 'jsonwebtoken';
 import HttpError from 'http-errors';
 
 const EXCLUDE = [
-  'POST:/users/create',
+  'POST:/users/register',
+  'GET:/users/list',
+  'POST:/users/login',
+  'POST:/users/forgot',
 ];
 
-const { PERSON_JWT_SECRET } = process.env;
+const { USER_JWT_SECRET } = process.env;
 
 function authorizationMiddleware(req, res, next) {
   try {
@@ -23,7 +26,7 @@ function authorizationMiddleware(req, res, next) {
       throw HttpError(401);
     }
 
-    const decoded = jwt.verify(token, PERSON_JWT_SECRET);
+    const decoded = jwt.verify(token, USER_JWT_SECRET);
     req.userId = decoded.userId;
     next();
   } catch (e) {
