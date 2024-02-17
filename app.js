@@ -28,7 +28,6 @@ app.use(routes);
 
 app.use((req, res, next) => next(HttpError(404)));
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   res.status(+err.status || 500);
 
@@ -44,7 +43,6 @@ const server = http.createServer(app);
 
 server.listen(PORT);
 
-// Настройка OAuth2 для получения refresh token
 const oAuth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,
@@ -68,7 +66,6 @@ app.get('/oauth2callback', async (req, res) => {
     const { tokens } = await oAuth2Client.getToken(code);
     console.log('Refresh token:', tokens.refresh_token);
 
-    // Используйте refresh token для отправки электронной почты
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
