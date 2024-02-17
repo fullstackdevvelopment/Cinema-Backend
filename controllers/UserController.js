@@ -259,50 +259,6 @@ class UserController {
       next(e);
     }
   }
-
-  static async userForgotPassword(req, res, next) {
-    try {
-      const { email } = req.body;
-      const user = await Users.findOne({ where: { email } });
-
-      if (!user) {
-        res.status(404);
-        throw new Error('User not found');
-      }
-
-      const resetToken = jwt.sign({ userId: user.id }, USER_RESET_PASSWORD_JWT_SECRET, {
-        expiresIn: '1d',
-      });
-
-      await ResetToken.create({ userId: user.id, resetToken });
-
-      const transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          type: 'OAuth2',
-          user: 'cinemafmovie@gmail.com',
-          clientId: CLIENT_ID,
-          clientSecret: CLIENT_SECRET,
-          refreshToken: 'your_refresh_token',
-        },
-      });
-
-      const mailOptions = {
-        from: 'cinemafmovie@gmail.com',
-        to: email,
-        subject: 'Password Reset',
-        text: `Click the link to reset your password: http://example.com/reset-password?token=${resetToken}`,
-      };
-
-      await transporter.sendMail(mailOptions);
-
-      res.json({
-        message: 'Password reset email sent successfully',
-      });
-    } catch (e) {
-      next(e);
-    }
-  }
 }
 
 export default UserController;

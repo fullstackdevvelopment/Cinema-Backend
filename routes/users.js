@@ -36,6 +36,4 @@ router.post('/login', UserController.login);
 router.put('/update', UserController.userUpdate);
 router.delete('/delete', UserController.userDelete);
 router.put('/password', UserController.userChangePassword);
-router.post('/forgot', UserController.userForgotPassword);
-
 export default router;
