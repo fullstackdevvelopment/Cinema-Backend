@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
-import HttpError from 'http-errors';
 import { v4 as idV4 } from 'uuid';
-import UserController from '../controllers/UserController.js';
+import HttpError from 'http-errors';
+import AdminController from '../controllers/AdminController.js';
 import validate from '../middlewares/validate.js';
 import schema from '../schemas/schema.js';
 
@@ -27,14 +27,11 @@ const upload = multer({
   },
 });
 
-// ***** PUBLIC ROUTES *****
-router.post('/register', upload.single('photo'), validate(schema.createUser), UserController.register);
-router.get('/list', UserController.userList);
-router.post('/login', UserController.login);
-
-// ***** PRIVATE ROUTES ***** NEED TOKEN *****
-router.put('/update', UserController.userUpdate);
-router.delete('/delete', UserController.userDelete);
-router.put('/password', UserController.userChangePassword);
+// ***** ONLY ADMINS ROUTES ***** NEED ADMIN TOKEN *****
+router.get('/ticket/list', AdminController.getTicketList);
+router.post('/movie/create', upload.fields([
+  { name: 'photo', maxCount: 1 },
+  { name: 'actorPhoto', maxCount: 1 },
+]), validate(schema.createMovie), AdminController.createMovieList);
 
 export default router;

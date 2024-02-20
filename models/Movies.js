@@ -51,12 +51,20 @@ Movies.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    actorName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     actorPhoto: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     duration: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.FLOAT,
+      allowNull: false,
+    },
+    categories: {
+      type: DataTypes.STRING,
       allowNull: false,
     },
   },

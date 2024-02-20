@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 const schema = {
-  create: Joi.object({
+  createUser: Joi.object({
     firstName: Joi.string().trim().required(),
     lastName: Joi.string().trim().required(),
     userName: Joi.string().trim().required(),
@@ -18,6 +18,20 @@ const schema = {
     selectedYear: Joi.string().trim().regex(/^\d{2}$/).required(),
     cvv: Joi.string().trim().length(3).required(),
     cardHolderName: Joi.string().trim().required(),
+  }),
+  createMovie: Joi.object({
+    title: Joi.string().required(),
+    details: Joi.string().required(),
+    language: Joi.string().required(),
+    releaseDate: Joi.date().required(),
+    director: Joi.string().required(),
+    storyLine: Joi.string().required(),
+    rating: Joi.number().required(),
+    voters: Joi.number().required(),
+    trailer: Joi.string().required(),
+    actorName: Joi.string().required(),
+    duration: Joi.number().required(),
+    categories: Joi.string().required(),
   }),
 };
 

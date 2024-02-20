@@ -28,6 +28,7 @@ function authorizationMiddleware(req, res, next) {
 
     const decoded = jwt.verify(token, USER_JWT_SECRET);
     req.userId = decoded.userId;
+    req.isAdmin = decoded.isAdmin;
     next();
   } catch (e) {
     next(e);

@@ -133,6 +133,8 @@ class UserController {
       password,
     } = req.body;
 
+    let token;
+
     try {
       const user = await Users.findOne(
         {
@@ -148,9 +150,15 @@ class UserController {
         throw HttpError(422, 'Invalid email or password');
       }
 
-      const token = jwt.sign({ userId: user.id }, USER_JWT_SECRET, {
-        expiresIn: '1d',
-      });
+      if (user.isAdmin === true) {
+        token = jwt.sign({ isAdmin: user.isAdmin }, USER_JWT_SECRET, {
+          expiresIn: '1d',
+        });
+      } else {
+        token = jwt.sign({ userId: user.id }, USER_JWT_SECRET, {
+          expiresIn: '1d',
+        });
+      }
 
       res.json({
         user,
