@@ -2,9 +2,11 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../services/sequelize.js';
 import Movies from './Movies.js';
 
-class Categories extends Model {}
+class Photos extends Model {
 
-Categories.init(
+}
+
+Photos.init(
   {
     id: {
       type: DataTypes.BIGINT.UNSIGNED,
@@ -12,37 +14,37 @@ Categories.init(
       autoIncrement: true,
       allowNull: false,
     },
-    name: {
+    moviePhoto: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
     sequelize,
-    tableName: 'categories',
-    modelName: 'categories',
+    tableName: 'photos',
+    modelName: 'photos',
   },
 );
 
-Categories.belongsTo(Movies, {
+Photos.belongsTo(Movies, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
   as: 'movies',
 });
 
-Movies.hasMany(Categories, {
+Movies.hasMany(Photos, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
-  as: 'categories',
+  as: 'photos',
 });
 
-Movies.hasOne(Categories, {
+Movies.hasOne(Photos, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
-  as: 'categorie',
+  as: 'photo',
 });
 
-export default Categories;
+export default Photos;

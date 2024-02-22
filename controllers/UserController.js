@@ -3,7 +3,9 @@ import fs from 'fs';
 import md5 from 'md5';
 import HttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
-import { Users, Cards } from '../models/index.js';
+import {
+  Users, Cards, Comments, Movies,
+} from '../models/index.js';
 
 const {
   USER_PASSWORD_HASH,
@@ -11,7 +13,7 @@ const {
 } = process.env;
 
 class UserController {
-  // USER REGISTER API
+  // ***** USER REGISTER API *****
   static async register(req, res, next) {
     try {
       const {
@@ -40,7 +42,7 @@ class UserController {
 
       if (file) {
         photoUrl = file.filename;
-        fs.renameSync(file.path, path.resolve('public', file.filename));
+        fs.renameSync(file.path, path.resolve('public/userPhoto', file.filename));
       }
 
       const existingUserByUserName = await Users.findOne({ where: { userName } });
@@ -108,7 +110,7 @@ class UserController {
     }
   }
 
-  // GET USERS LIST API
+  // ***** GET USERS LIST API *****
   static async userList(req, res, next) {
     try {
       const users = await Users.findAll({
@@ -126,7 +128,7 @@ class UserController {
     }
   }
 
-  // USER LOGIN API
+  // ***** USER LOGIN API *****
   static async login(req, res, next) {
     const {
       userName,
@@ -169,7 +171,7 @@ class UserController {
     }
   }
 
-  // USER UPDATE API
+  // ***** USER UPDATE API *****
   static async userUpdate(req, res, next) {
     try {
       const {
@@ -209,7 +211,7 @@ class UserController {
     }
   }
 
-  // USER PROFILE DELETE API
+  // ***** USER PROFILE DELETE API *****
   static async userDelete(req, res, next) {
     try {
       const { userId } = req;
@@ -235,10 +237,13 @@ class UserController {
     }
   }
 
-  // USER CHANGE PASSWORD
+  // ***** USER CHANGE PASSWORD *****
   static async userChangePassword(req, res, next) {
     try {
-      const { oldPassword, newPassword } = req.body;
+      const {
+        oldPassword,
+        newPassword,
+      } = req.body;
       const { userId } = req;
 
       const user = await Users.findByPk(userId);
@@ -258,6 +263,42 @@ class UserController {
 
       res.json({
         message: 'Password changed successfully',
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // ***** USER CREATE COMMENT *****
+  static async createMovieComment(req, res, next) {
+    try {
+      const { movieId } = req.params;
+      const { commentText, rating } = req.body;
+      const { userId } = req;
+
+      console.log(movieId);
+      console.log(userId);
+
+      const user = await Users.findByPk(userId);
+      const movie = await Movies.findByPk(movieId);
+
+      if (!user) {
+        throw HttpError('User Not Found');
+      }
+
+      if (!movie) {
+        throw HttpError('Movie Not Found');
+      }
+
+      const newComments = await Comments.create({
+        commentText,
+        rating,
+        movieId: movie.id,
+        userId: user.id,
+      });
+
+      res.json({
+        newComments,
       });
     } catch (e) {
       next(e);

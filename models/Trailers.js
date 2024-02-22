@@ -2,9 +2,9 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../services/sequelize.js';
 import Movies from './Movies.js';
 
-class Categories extends Model {}
+class Trailers extends Model {}
 
-Categories.init(
+Trailers.init(
   {
     id: {
       type: DataTypes.BIGINT.UNSIGNED,
@@ -12,37 +12,37 @@ Categories.init(
       autoIncrement: true,
       allowNull: false,
     },
-    name: {
+    trailer: {
       type: DataTypes.STRING,
       allowNull: false,
     },
   },
   {
     sequelize,
-    tableName: 'categories',
-    modelName: 'categories',
+    tableName: 'trailers',
+    modelName: 'trailers',
   },
 );
 
-Categories.belongsTo(Movies, {
+Trailers.belongsTo(Movies, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
   as: 'movies',
 });
 
-Movies.hasMany(Categories, {
+Movies.hasMany(Trailers, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
-  as: 'categories',
+  as: 'trailers',
 });
 
-Movies.hasOne(Categories, {
+Movies.hasOne(Trailers, {
   foreignKey: 'movieId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
-  as: 'categorie',
+  as: 'trailer',
 });
 
-export default Categories;
+export default Trailers;

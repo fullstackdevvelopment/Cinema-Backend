@@ -43,28 +43,8 @@ Movies.init(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    trailer: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    photo: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    actorName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    actorPhoto: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     duration: {
       type: DataTypes.FLOAT,
-      allowNull: false,
-    },
-    categories: {
-      type: DataTypes.STRING,
       allowNull: false,
     },
   },

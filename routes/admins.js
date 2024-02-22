@@ -16,7 +16,7 @@ const upload = multer({
     },
   }),
   fileFilter: (req, file, cb) => {
-    if (['image/png', 'image/jpeg'].includes(file.mimetype)) {
+    if (['image/png', 'image/jpeg', 'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv'].includes(file.mimetype)) {
       cb(null, true);
     } else {
       cb(HttpError('Invalid File Type'));
@@ -30,8 +30,18 @@ const upload = multer({
 // ***** ONLY ADMINS ROUTES ***** NEED ADMIN TOKEN *****
 router.get('/ticket/list', AdminController.getTicketList);
 router.post('/movie/create', upload.fields([
-  { name: 'photo', maxCount: 1 },
-  { name: 'actorPhoto', maxCount: 1 },
+  { name: 'moviePhoto', maxCount: 1 },
+  { name: 'actorPhoto1', maxCount: 1 },
+  { name: 'actorPhoto2', maxCount: 1 },
+  { name: 'actorPhoto3', maxCount: 1 },
+  { name: 'actorPhoto4', maxCount: 1 },
+  { name: 'actorPhoto5', maxCount: 1 },
+  { name: 'actorPhoto6', maxCount: 1 },
+  { name: 'actorPhoto7', maxCount: 1 },
+  { name: 'trailer', maxCount: 1 },
 ]), validate(schema.createMovie), AdminController.createMovieList);
+
+router.get('/movie/list', AdminController.getMovieList);
+router.get('/review/list', AdminController.getReviewList);
 
 export default router;

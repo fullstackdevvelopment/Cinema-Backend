@@ -28,10 +28,15 @@ const schema = {
     storyLine: Joi.string().required(),
     rating: Joi.number().required(),
     voters: Joi.number().required(),
-    trailer: Joi.string().required(),
-    actorName: Joi.string().required(),
+    actorName1: Joi.string(),
+    actorName2: Joi.string(),
+    actorName3: Joi.string(),
+    actorName4: Joi.string(),
+    actorName5: Joi.string(),
+    actorName6: Joi.string(),
+    actorName7: Joi.string(),
     duration: Joi.number().required(),
-    categories: Joi.string().required(),
+    categoryNames: Joi.string().required(),
   }),
 };
 
