@@ -35,14 +35,14 @@ class AdminController {
     try {
       const {
         title, details, language, releaseDate, director, storyLine,
-        rating, actorName1, actorName2, actorName3, actorName4, actorName5, actorName6, actorName7,
+        rating, actorName1, actorName2, actorName3, actorName4, actorName5, actorName6,
         duration, voters, categoryNames,
       } = req.body;
 
       const {
         moviePhoto, actorPhoto1, actorPhoto2,
         actorPhoto3, actorPhoto4, actorPhoto5,
-        actorPhoto6, actorPhoto7, trailer,
+        actorPhoto6, trailer,
       } = req.files;
 
       let photoUrl;
@@ -52,7 +52,6 @@ class AdminController {
       let actorPhotoUrl4;
       let actorPhotoUrl5;
       let actorPhotoUrl6;
-      let actorPhotoUrl7;
       let trailerUrl;
 
       if (moviePhoto) {
@@ -114,29 +113,20 @@ class AdminController {
         });
       }
 
-      if (actorPhoto7) {
-        actorPhotoUrl7 = '';
-        actorPhoto7.forEach((file) => {
-          const filename = `${idV4()}-${file.originalname}`;
-          actorPhotoUrl7 = filename;
-          fs.renameSync(file.path, path.resolve('public/actorPhotos', filename));
-        });
-      }
-
       if (trailer) {
         trailerUrl = trailer[0].filename;
         fs.renameSync(trailer[0].path, path.resolve('public/trailers', trailer[0].filename));
       }
 
-      const { isAdmin } = req;
+      // const { isAdmin } = req;
 
-      if (typeof isAdmin === 'undefined') {
-        throw Error('isAdmin is not defined in req');
-      }
-
-      if (!isAdmin) {
-        throw HttpError(403, 'Forbidden');
-      }
+      // if (typeof isAdmin === 'undefined') {
+      //   throw Error('isAdmin is not defined in req');
+      // }
+      //
+      // if (!isAdmin) {
+      //   throw HttpError(403, 'Forbidden');
+      // }
 
       const newMovie = await Movies.create({
         title,
@@ -152,7 +142,6 @@ class AdminController {
         actorName4,
         actorName5,
         actorName6,
-        actorName7,
         duration,
         voters,
       });
@@ -179,14 +168,12 @@ class AdminController {
         name4: actorName4,
         name5: actorName5,
         name6: actorName6,
-        name7: actorName7,
         actorPhoto1: actorPhotoUrl1,
         actorPhoto2: actorPhotoUrl2,
         actorPhoto3: actorPhotoUrl3,
         actorPhoto4: actorPhotoUrl4,
         actorPhoto5: actorPhotoUrl5,
         actorPhoto6: actorPhotoUrl6,
-        actorPhoto7: actorPhotoUrl7,
         movieId: newMovie.id,
       });
 

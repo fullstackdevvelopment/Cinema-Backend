@@ -276,9 +276,6 @@ class UserController {
       const { commentText, rating } = req.body;
       const { userId } = req;
 
-      console.log(movieId);
-      console.log(userId);
-
       const user = await Users.findByPk(userId);
       const movie = await Movies.findByPk(movieId);
 

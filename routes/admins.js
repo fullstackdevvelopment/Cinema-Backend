@@ -37,7 +37,6 @@ router.post('/movie/create', upload.fields([
   { name: 'actorPhoto4', maxCount: 1 },
   { name: 'actorPhoto5', maxCount: 1 },
   { name: 'actorPhoto6', maxCount: 1 },
-  { name: 'actorPhoto7', maxCount: 1 },
   { name: 'trailer', maxCount: 1 },
 ]), validate(schema.createMovie), AdminController.createMovieList);
 

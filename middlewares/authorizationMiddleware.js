@@ -6,6 +6,7 @@ const EXCLUDE = [
   'GET:/users/list',
   'POST:/users/login',
   'POST:/users/forgot',
+  'POST:/movie/create',
 ];
 
 const { USER_JWT_SECRET } = process.env;
