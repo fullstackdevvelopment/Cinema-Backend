@@ -2,8 +2,8 @@ import { Router } from 'express';
 import multer from 'multer';
 import HttpError from 'http-errors';
 import { v4 as idV4 } from 'uuid';
-import UserController from '../controllers/UserController.js';
-import validate from '../middlewares/validate.js';
+import UserC from '../controllers/UserC.js';
+import validateM from '../middlewares/validateM.js';
 import schema from '../schemas/schema.js';
 
 const router = Router();
@@ -28,14 +28,10 @@ const upload = multer({
 });
 
 // ***** PUBLIC ROUTES *****
-router.post('/register', upload.single('photo'), validate(schema.createUser), UserController.register);
-router.get('/list', UserController.userList);
-router.post('/login', UserController.login);
+router.post('/register', upload.single('photo'), validateM(schema.createUser), UserC.register);
+router.post('/login', UserC.login);
 
 // ***** PRIVATE ROUTES ***** NEED TOKEN *****
-router.put('/update', UserController.userUpdate);
-router.delete('/delete', UserController.userDelete);
-router.put('/password', UserController.userChangePassword);
-router.post('/movie/comment/:movieId', UserController.createMovieComment);
+router.put('/update', UserC.userUpdate);
 
 export default router;

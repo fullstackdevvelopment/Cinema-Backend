@@ -10,61 +10,13 @@ Actors.init(
       type: DataTypes.BIGINT.UNSIGNED,
       primaryKey: true,
       autoIncrement: true,
-      allowNull: true,
+      allowNull: false,
     },
-    name1: {
+    name: {
       type: DataTypes.STRING,
-      allowNull: true,
+      allowNull: false,
     },
-    actorPhoto1: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name2: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto2: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name3: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto3: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name4: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto4: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name5: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto5: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name6: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto6: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    name7: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    actorPhoto7: {
+    photo: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -78,23 +30,16 @@ Actors.init(
 
 Actors.belongsTo(Movies, {
   foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
-  as: 'movies',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
+  as: 'movie',
 });
 
 Movies.hasMany(Actors, {
   foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
+  onDelete: 'CASCADE',
+  onUpdate: 'CASCADE',
   as: 'actors',
-});
-
-Movies.hasOne(Actors, {
-  foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
-  as: 'actor',
 });
 
 export default Actors;

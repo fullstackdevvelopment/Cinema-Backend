@@ -1,46 +1,38 @@
 import { Router } from 'express';
-import multer from 'multer';
-import { v4 as idV4 } from 'uuid';
-import HttpError from 'http-errors';
-import AdminController from '../controllers/AdminController.js';
-import validate from '../middlewares/validate.js';
+import validateM from '../middlewares/validateM.js';
 import schema from '../schemas/schema.js';
+import MovieC from '../controllers/MovieC.js';
+import isAdminM from '../middlewares/isAdminM.js';
+import BookingC from '../controllers/BookingC.js';
+import CategoryC from '../controllers/CategoryC.js';
+import CommentC from '../controllers/CommentC.js';
+import UserC from '../controllers/UserC.js';
+import corsM from '../middlewares/corsM.js';
+import upload from '../middlewares/multerM.js';
 
 const router = Router();
 
-const upload = multer({
-  storage: multer.diskStorage({
-    filename: (req, file, cb) => {
-      const fileName = `${idV4()}-${file.originalname}`;
-      cb(null, fileName);
-    },
-  }),
-  fileFilter: (req, file, cb) => {
-    if (['image/png', 'image/jpeg', 'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv'].includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(HttpError('Invalid File Type'));
-    }
-  },
-  limits: {
-    fileSize: 50 * 1024 * 1024,
-  },
-});
+router.use('/movie/create', corsM);
+// ***** LOGIN API FOR ADMIN *****
+router.post('/login', UserC.login);
 
-// ***** ONLY ADMINS ROUTES ***** NEED ADMIN TOKEN *****
-router.get('/ticket/list', AdminController.getTicketList);
+// ***** DASHBOARD API ***** // ***** USERS LIST API *****
+router.get('/booking/list', isAdminM, BookingC.getBookingLIst);
+router.get('/user/list', isAdminM, UserC.userList);
+
+// ***** MOVIE LIST API *****
+router.post('/upload/file', isAdminM, upload.single('file'), MovieC.uploadFiles);
 router.post('/movie/create', upload.fields([
-  { name: 'moviePhoto', maxCount: 1 },
-  { name: 'actorPhoto1', maxCount: 1 },
-  { name: 'actorPhoto2', maxCount: 1 },
-  { name: 'actorPhoto3', maxCount: 1 },
-  { name: 'actorPhoto4', maxCount: 1 },
-  { name: 'actorPhoto5', maxCount: 1 },
-  { name: 'actorPhoto6', maxCount: 1 },
-  { name: 'trailer', maxCount: 1 },
-]), validate(schema.createMovie), AdminController.createMovieList);
+  { name: 'files[]', maxCount: 10 },
+]), MovieC.createMovie);
+router.get('/movie/list', MovieC.getMovieList);
+router.put('/movie/change/:movieId', isAdminM, upload.array('files', 20), validateM(schema.createMovie), MovieC.changeMovie);
+router.post('/category/create', isAdminM, CategoryC.createCategory);
+router.put('/category/delete/:categoryId', isAdminM, CategoryC.deleteCategory);
+router.get('/category/list', isAdminM, CategoryC.getCategoryList);
 
-router.get('/movie/list', AdminController.getMovieList);
-router.get('/review/list', AdminController.getReviewList);
+// ***** API FOR REVIEW LIST *****
+router.get('/review/list', isAdminM, CommentC.getCommentList);
+router.put('/review/delete/:commentId', isAdminM, CommentC.deleteComment);
 
 export default router;

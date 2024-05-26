@@ -1,8 +1,26 @@
 import { DataTypes, Model } from 'sequelize';
+import md5 from 'md5';
 import sequelize from '../services/sequelize.js';
 
-class Users extends Model {
+const { USER_PASSWORD_HASH } = process.env;
 
+class Users extends Model {
+  static async createAdmin() {
+    const passwordHash = md5(md5('admin_password') + USER_PASSWORD_HASH);
+    const admin = await this.create({
+      firstName: 'Admin',
+      lastName: 'Admin',
+      userName: 'admin',
+      email: 'admin@example.com',
+      password: passwordHash,
+      city: 'Admin City',
+      country: 'Admin Country',
+      address: 'Admin Address',
+      phone: '1234567890',
+      photo: null,
+    });
+    await admin.update({ isAdmin: true });
+  }
 }
 
 Users.init(
@@ -70,5 +88,12 @@ Users.init(
     ],
   },
 );
+
+Users.afterSync(async () => {
+  const adminExists = await Users.findOne({ where: { isAdmin: true } });
+  if (!adminExists) {
+    await Users.createAdmin();
+  }
+});
 
 export default Users;

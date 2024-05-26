@@ -1,5 +1,5 @@
 import {
-  Users, Movies, Cards, Comments, Bookings, Categories, Photos, Trailers, Actors,
+  Users, Movies, Cards, Comments, Bookings, Categories, Photos, Trailers, Actors, MovieCategories,
 } from './models/index.js';
 
 async function main() {
@@ -9,6 +9,7 @@ async function main() {
   await Comments.sync({ alter: true, logging: true });
   await Bookings.sync({ alter: true, logging: true });
   await Categories.sync({ alter: true, logging: true });
+  await MovieCategories.sync({ alter: true, logging: true });
   await Photos.sync({ alter: true, logging: true });
   await Trailers.sync({ alter: true, logging: true });
   await Actors.sync({ alter: true, logging: true });

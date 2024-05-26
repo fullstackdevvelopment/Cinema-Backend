@@ -2,11 +2,11 @@ export const ALLOW_ORIGINS = [
   'http://localhost:3000',
 ];
 
-export default function cors(req, res, next) {
+export default function corsM(req, res, next) {
   try {
-    const { origin } = req.headers;
-    if (ALLOW_ORIGINS.includes(origin)) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
+    const { origin, referer } = req.headers;
+    if (ALLOW_ORIGINS.includes(origin) || ALLOW_ORIGINS.includes(referer)) {
+      res.setHeader('Access-Control-Allow-Origin', origin || referer);
     }
     res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
     res.setHeader('Access-Control-Allow-Headers', 'Origin,Accept,Content-Type,Authorization');

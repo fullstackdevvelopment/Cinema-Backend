@@ -13,12 +13,12 @@ Bookings.init(
       autoIncrement: true,
       allowNull: false,
     },
-    row: {
+    bookingRow: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     seatNumber: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.STRING,
       allowNull: false,
     },
     status: {
@@ -49,6 +49,11 @@ Bookings.belongsTo(Movies, {
   onDelete: 'cascade',
   onUpdate: 'cascade',
   as: 'movies',
+});
+
+Users.hasMany(Bookings, {
+  foreignKey: 'userId',
+  as: 'bookings',
 });
 
 export default Bookings;

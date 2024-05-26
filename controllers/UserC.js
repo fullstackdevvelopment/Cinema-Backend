@@ -4,7 +4,7 @@ import md5 from 'md5';
 import HttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import {
-  Users, Cards, Comments, Movies,
+  Users, Cards, Bookings,
 } from '../models/index.js';
 
 const {
@@ -12,7 +12,7 @@ const {
   USER_JWT_SECRET,
 } = process.env;
 
-class UserController {
+class UserC {
   // ***** USER REGISTER API *****
   static async register(req, res, next) {
     try {
@@ -110,61 +110,63 @@ class UserController {
     }
   }
 
-  // ***** GET USERS LIST API *****
-  static async userList(req, res, next) {
+  // ***** USER LOGIN API *****
+  static async login(req, res, next) {
     try {
-      const users = await Users.findAll({
-        include: [{
-          model: Cards,
-          as: 'cards',
-        }],
+      const {
+        userName,
+        password,
+      } = req.body;
+
+      const user = await Users.findOne({
+        where: { userName },
+        attributes: {
+          exclude: ['password'],
+        },
+      });
+
+      if (!user) {
+        throw HttpError(404);
+      }
+
+      const fullUser = await Users.findByPk(user.id);
+
+      const hashedPassword = md5(md5(password) + USER_PASSWORD_HASH);
+      if (fullUser.password !== hashedPassword) {
+        throw HttpError(422, 'Invalid email or password');
+      }
+
+      const token = jwt.sign({ userId: user.id }, USER_JWT_SECRET, {
+        expiresIn: '1d',
       });
 
       res.json({
-        users,
+        user,
+        token,
       });
     } catch (e) {
       next(e);
     }
   }
 
-  // ***** USER LOGIN API *****
-  static async login(req, res, next) {
-    const {
-      userName,
-      password,
-    } = req.body;
-
-    let token;
-
+  // ***** USER LIST API FOR ADMIN *****
+  static async userList(req, res, next) {
     try {
-      const user = await Users.findOne(
-        {
-          where: { userName },
+      const list = await Users.findAll({
+        attributes: {
+          exclude: ['password'],
         },
-      );
+        include: {
+          model: Bookings,
+          as: 'bookings',
+        },
+      });
 
-      if (!user) {
-        throw HttpError(404);
-      }
-
-      if (!user || user.password !== md5(md5(password) + USER_PASSWORD_HASH)) {
-        throw HttpError(422, 'Invalid email or password');
-      }
-
-      if (user.isAdmin === true) {
-        token = jwt.sign({ isAdmin: user.isAdmin }, USER_JWT_SECRET, {
-          expiresIn: '1d',
-        });
-      } else {
-        token = jwt.sign({ userId: user.id }, USER_JWT_SECRET, {
-          expiresIn: '1d',
-        });
-      }
+      const filteredList = list.filter((user) => !user.isAdmin);
 
       res.json({
-        user,
-        token,
+        status: 'ok',
+        list: filteredList,
       });
     } catch (e) {
       next(e);
@@ -210,97 +212,6 @@ class UserController {
       next(e);
     }
   }
-
-  // ***** USER PROFILE DELETE API *****
-  static async userDelete(req, res, next) {
-    try {
-      const { userId } = req;
-      const user = await Users.findByPk(userId);
-
-      if (!user) {
-        res.status(404);
-        throw HttpError(404, 'User not found');
-      }
-
-      if (user.isAdmin) {
-        res.status(403);
-        throw HttpError(403, 'Can\'t delete admin user');
-      }
-
-      await user.destroy();
-
-      res.json({
-        status: 'User deleted successfully',
-      });
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  // ***** USER CHANGE PASSWORD *****
-  static async userChangePassword(req, res, next) {
-    try {
-      const {
-        oldPassword,
-        newPassword,
-      } = req.body;
-      const { userId } = req;
-
-      const user = await Users.findByPk(userId);
-
-      if (!user) {
-        res.status(404);
-        throw HttpError(404, 'User not found');
-      }
-
-      if (user.password !== md5(md5(oldPassword) + USER_PASSWORD_HASH)) {
-        res.status(422);
-        throw HttpError(422, 'Old password is incorrect');
-      }
-
-      user.password = md5(md5(newPassword) + USER_PASSWORD_HASH);
-      await user.save();
-
-      res.json({
-        message: 'Password changed successfully',
-      });
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  // ***** USER CREATE COMMENT *****
-  static async createMovieComment(req, res, next) {
-    try {
-      const { movieId } = req.params;
-      const { commentText, rating } = req.body;
-      const { userId } = req;
-
-      const user = await Users.findByPk(userId);
-      const movie = await Movies.findByPk(movieId);
-
-      if (!user) {
-        throw HttpError('User Not Found');
-      }
-
-      if (!movie) {
-        throw HttpError('Movie Not Found');
-      }
-
-      const newComments = await Comments.create({
-        commentText,
-        rating,
-        movieId: movie.id,
-        userId: user.id,
-      });
-
-      res.json({
-        newComments,
-      });
-    } catch (e) {
-      next(e);
-    }
-  }
 }
 
-export default UserController;
+export default UserC;

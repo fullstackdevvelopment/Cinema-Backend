@@ -4,6 +4,7 @@ export { default as Movies } from './Movies.js';
 export { default as Comments } from './Comments.js';
 export { default as Bookings } from './Bookings.js';
 export { default as Categories } from './Сategories.js';
+export { default as MovieCategories } from './MovieCategories.js';
 export { default as Photos } from './Photos.js';
 export { default as Trailers } from './Trailers.js';
 export { default as Actors } from './Actors.js';

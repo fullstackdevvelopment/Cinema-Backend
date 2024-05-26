@@ -24,25 +24,18 @@ Categories.init(
   },
 );
 
-Categories.belongsTo(Movies, {
-  foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
+Categories.belongsToMany(Movies, {
+  through: 'movieCategories',
+  foreignKey: 'categoryId',
+  otherKey: 'movieId',
   as: 'movies',
 });
 
-Movies.hasMany(Categories, {
+Movies.belongsToMany(Categories, {
+  through: 'movieCategories',
   foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
+  otherKey: 'categoryId',
   as: 'categories',
-});
-
-Movies.hasOne(Categories, {
-  foreignKey: 'movieId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
-  as: 'categorie',
 });
 
 export default Categories;

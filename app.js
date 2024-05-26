@@ -3,18 +3,18 @@ import morgan from 'morgan';
 import HttpError from 'http-errors';
 import path from 'path';
 import http from 'http';
-import cors from './middlewares/cors.js';
+import corsM from './middlewares/corsM.js';
 import routes from './routes/index.js';
-import authorizationMiddleware from './middlewares/authorizationMiddleware.js';
+import authorizationM from './middlewares/authorizationM.js';
 
 const { PORT } = process.env;
 
 const app = express();
 
-app.use(cors);
-app.use(authorizationMiddleware);
+app.use(corsM);
+app.use(authorizationM);
 app.use(morgan('dev'));
-app.use(express.urlencoded());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static(path.resolve('public')));
 
@@ -25,7 +25,6 @@ app.use((req, res, next) => next(HttpError(404)));
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   res.status(+err.status || 500);
-
   res.json({
     status: 'error',
     message: err.message,
@@ -36,4 +35,6 @@ app.use((err, req, res, next) => {
 
 const server = http.createServer(app);
 
-server.listen(PORT);
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

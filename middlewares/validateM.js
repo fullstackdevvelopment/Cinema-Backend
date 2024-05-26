@@ -1,7 +1,7 @@
 import HttpError from 'http-errors';
 import _ from 'lodash';
 
-const validate = (schema, path = 'body') => (req, res, next) => {
+const validateM = (schema, path = 'body') => (req, res, next) => {
   try {
     const valid = schema.validate(req[path], {
       abortEarly: false,
@@ -22,4 +22,4 @@ const validate = (schema, path = 'body') => (req, res, next) => {
   }
 };
 
-export default validate;
+export default validateM;
