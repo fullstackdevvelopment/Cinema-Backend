@@ -15,7 +15,6 @@ const { USER_JWT_SECRET } = process.env;
 function authorizationM(req, res, next) {
   try {
     const { method, path } = req;
-    console.log(method, path);
     const authorization = req.headers.authorization || req.headers.Authorization;
 
     if (method === 'OPTIONS' || EXCLUDE.includes(`${method}:${path}`)) {

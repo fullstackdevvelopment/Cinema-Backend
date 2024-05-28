@@ -17,13 +17,13 @@ router.use('/movie/create', corsM);
 router.post('/login', UserC.login);
 
 // ***** DASHBOARD API ***** // ***** USERS LIST API *****
-router.get('/booking/list', isAdminM, BookingC.getBookingLIst);
+router.get('/booking/list', isAdminM, BookingC.getBookingList);
 router.get('/user/list', isAdminM, UserC.userList);
 
 // ***** MOVIE LIST API *****
 router.post('/upload/file', isAdminM, upload.single('file'), MovieC.uploadFiles);
 router.post('/movie/create', upload.fields([
-  { name: 'files[]', maxCount: 10 },
+  { name: 'files', maxCount: 10 },
 ]), MovieC.createMovie);
 router.get('/movie/list', MovieC.getMovieList);
 router.put('/movie/change/:movieId', isAdminM, upload.array('files', 20), validateM(schema.createMovie), MovieC.changeMovie);

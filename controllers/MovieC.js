@@ -50,12 +50,11 @@ class MovieC {
         title, details, language, releaseDate, director, storyLine,
         rating, duration, voters, categories, actors,
       } = req.body;
+      const { files } = req.files;
+      const actorArray = JSON.parse(actors);
 
-      // const { photos, videos, actorPhotos } = sortFiles(req.files);
-      console.log(req.files);
-      let photoUrl;
-      let trailerUrl;
-      const actorPhotoUrls = [];
+      const photoFile = files.find((file) => file.mimetype.startsWith('image/'));
+      const trailerFile = files.find((file) => file.mimetype.startsWith('video/'));
 
       const newMovie = await Movies.create({
         title,
@@ -70,18 +69,23 @@ class MovieC {
       });
 
       const newPhotos = await Photos.create({
-        moviePhoto: photoUrl,
+        moviePhoto: photoFile.filename,
         movieId: newMovie.id,
       });
 
       const newTrailer = await Trailers.create({
-        trailer: trailerUrl,
+        trailer: trailerFile.filename,
         movieId: newMovie.id,
       });
 
-      const newActors = await createActors(newMovie.id, actors, actorPhotoUrls);
-
       const newCategory = await createMovieCategories(newMovie.id, categories);
+
+      const actorPromises = actorArray.map(async (actor) => Actors.create({
+        name: actor.name,
+        photo: actor.photo,
+        movieId: newMovie.id,
+      }));
+      const newActors = await Promise.all(actorPromises);
 
       res.json({
         newMovie,
@@ -240,7 +244,7 @@ class MovieC {
       const { file } = req;
       const actor = {
         name,
-        photo: file.path,
+        photo: file.filename,
       };
       res.json({
         actor,

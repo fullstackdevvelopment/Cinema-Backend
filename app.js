@@ -12,11 +12,11 @@ const { PORT } = process.env;
 const app = express();
 
 app.use(corsM);
+app.use(express.static(path.resolve('public')));
 app.use(authorizationM);
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static(path.resolve('public')));
 
 app.use(routes);
 
