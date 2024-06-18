@@ -1,45 +1,14 @@
-import fs from 'fs';
-import path from 'path';
+import HttpError from 'http-errors';
 import {
-  Actors, Categories, MovieCategories, Movies, Photos, Trailers,
+  Actors, Categories, MovieCategories, Movies, MovieStills, Photos, Trailers,
 } from '../models/index.js';
 
-const createActors = async (movieId, actors, actorPhotoUrls) => {
-  const actorData = actors.map((actorName, index) => ({
-    name: actorName,
-    photo: actorPhotoUrls[index],
-    movieId,
-  }));
-  return Actors.bulkCreate(actorData);
-};
 const createMovieCategories = async (movieId, categoryIds) => {
   const movieCategoryData = categoryIds.map((categoryId) => ({
     movieId,
     categoryId,
   }));
   return MovieCategories.bulkCreate(movieCategoryData);
-};
-const sortFiles = (files) => {
-  const photos = [];
-  const videos = [];
-  const actorPhotos = [];
-
-  files.forEach((file) => {
-    const mimeType = file.mimetype.split('/')[0];
-    if (mimeType === 'image') {
-      if (file.originalname.startsWith('moviePhoto')) {
-        photos.push(file);
-      } else if (file.originalname.startsWith('actorPhoto')) {
-        actorPhotos.push(file);
-      }
-    } else if (mimeType === 'video') {
-      if (file.originalname.startsWith('trailer')) {
-        videos.push(file);
-      }
-    }
-  });
-
-  return { photos, videos, actorPhotos };
 };
 
 class MovieC {
@@ -48,13 +17,43 @@ class MovieC {
     try {
       const {
         title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors,
+        rating, duration, voters, categories, actors, stills, files,
       } = req.body;
-      const { files } = req.files;
-      const actorArray = JSON.parse(actors);
 
-      const photoFile = files.find((file) => file.mimetype.startsWith('image/'));
-      const trailerFile = files.find((file) => file.mimetype.startsWith('video/'));
+      if (!title || !details || !language || !releaseDate || !director || !storyLine
+        || rating == null || !duration || !voters || !categories || !actors || !stills || !files) {
+        let errorMessage = 'Missing required fields: ';
+        if (!title) errorMessage += 'Title, ';
+        if (!details) errorMessage += 'Details, ';
+        if (!language) errorMessage += 'Language, ';
+        if (!releaseDate) errorMessage += 'Release Date, ';
+        if (!director) errorMessage += 'Director, ';
+        if (!storyLine) errorMessage += 'Story Line, ';
+        if (rating == null) errorMessage += 'Rating, ';
+        if (!duration) errorMessage += 'Duration, ';
+        if (!voters) errorMessage += 'Voters, ';
+        if (!categories) errorMessage += 'Categories, ';
+        if (!actors) errorMessage += 'Actors, ';
+        if (!stills) errorMessage += 'Stills, ';
+        if (!files) errorMessage += 'Files, ';
+
+        errorMessage = errorMessage.slice(0, -2);
+
+        next({
+          status: 400,
+          message: errorMessage,
+        });
+      }
+
+      const actorArray = JSON.parse(actors);
+      const stillArray = JSON.parse(stills);
+      const filesArray = JSON.parse(files);
+      const categoriesArray = JSON.parse(categories);
+
+      const photoFile = filesArray.find((file) => file.photo?.endsWith('.webp'))
+        || filesArray.find((file) => file.photo?.endsWith('.png'))
+        || filesArray.find((file) => file.photo?.endsWith('.jpg'));
+      const trailerFile = filesArray.find((file) => file.trailer?.endsWith('.mp4'));
 
       const newMovie = await Movies.create({
         title,
@@ -69,16 +68,16 @@ class MovieC {
       });
 
       const newPhotos = await Photos.create({
-        moviePhoto: photoFile.filename,
+        moviePhoto: photoFile.photo,
         movieId: newMovie.id,
       });
 
       const newTrailer = await Trailers.create({
-        trailer: trailerFile.filename,
+        trailer: trailerFile.trailer,
         movieId: newMovie.id,
       });
 
-      const newCategory = await createMovieCategories(newMovie.id, categories);
+      const newCategory = await createMovieCategories(newMovie.id, categoriesArray);
 
       const actorPromises = actorArray.map(async (actor) => Actors.create({
         name: actor.name,
@@ -87,15 +86,22 @@ class MovieC {
       }));
       const newActors = await Promise.all(actorPromises);
 
+      const stillPromises = stillArray.map(async (still) => MovieStills.create({
+        stillPath: still.photo,
+        movieId: newMovie.id,
+      }));
+      const newStills = await Promise.all(stillPromises);
+
       res.json({
         newMovie,
         newPhotos,
         newTrailer,
         newCategory,
         newActors,
+        newStills,
       });
     } catch (e) {
-      console.log(e);
+      console.error(e);
       next(e);
     }
   }
@@ -104,7 +110,8 @@ class MovieC {
   static async getMovieList(req, res, next) {
     try {
       const { page = 1, limit = 6 } = req.query;
-      const offset = (page - 1) * limit;
+
+      const count = await Movies.count();
 
       const list = await Movies.findAll({
         include: [
@@ -125,15 +132,15 @@ class MovieC {
             as: 'actors',
           },
         ],
-        limit: parseInt(limit, 10),
-        offset: parseInt(offset, 10),
       });
+
+      const totalPages = Math.ceil(count / limit);
 
       res.json({
         list,
         limit,
         page,
-        offset,
+        totalPages,
       });
     } catch (e) {
       next(e);
@@ -143,8 +150,37 @@ class MovieC {
   // ***** GET MOVIE LIST API ONLY FOR ADMIN *****
   static async changeMovie(req, res, next) {
     try {
-      const { movieId } = req.params;
+      const {
+        title, details, language, releaseDate, director, storyLine,
+        rating, duration, voters, categories, actors, stills, files,
+      } = req.body;
 
+      if (!title || !details || !language || !releaseDate || !director || !storyLine
+        || rating == null || !duration || !voters || !categories || !actors || !stills || !files) {
+        let errorMessage = 'Missing required fields: ';
+        if (!title) errorMessage += 'Title, ';
+        if (!details) errorMessage += 'Details, ';
+        if (!language) errorMessage += 'Language, ';
+        if (!releaseDate) errorMessage += 'Release Date, ';
+        if (!director) errorMessage += 'Director, ';
+        if (!storyLine) errorMessage += 'Story Line, ';
+        if (rating == null) errorMessage += 'Rating, ';
+        if (!duration) errorMessage += 'Duration, ';
+        if (!voters) errorMessage += 'Voters, ';
+        if (!categories) errorMessage += 'Categories, ';
+        if (!actors) errorMessage += 'Actors, ';
+        if (!stills) errorMessage += 'Stills, ';
+        if (!files) errorMessage += 'Files, ';
+
+        errorMessage = errorMessage.slice(0, -2);
+
+        next({
+          status: 400,
+          message: errorMessage,
+        });
+      }
+
+      const { movieId } = req.params;
       const movie = await Movies.findByPk(movieId, {
         include: [
           {
@@ -166,57 +202,30 @@ class MovieC {
         ],
       });
 
+      if (!movie) {
+        throw HttpError(404, 'Movie not found');
+      }
+
+      const actorArray = JSON.parse(actors);
+      const stillArray = JSON.parse(stills);
+      const filesArray = JSON.parse(files);
+      const categoriesArray = JSON.parse(categories);
+
+      const photoFile = filesArray.find((file) => file && file.mimetype && file.mimetype.startsWith('image/'))
+        || filesArray.find((file) => file && file.moviePhoto && (file.moviePhoto.endsWith('.png')
+        || file.moviePhoto.endsWith('.webp') || file.moviePhoto.endsWith('.jpg')));
+
+      const trailerFile = filesArray.find((file) => file && file.mimetype && file.mimetype.startsWith('video/'))
+        || filesArray.find((file) => file && file.type && file.type.startsWith('video/'))
+        || filesArray.find((file) => file && file.trailer && file.trailer.endsWith('.mp4'))
+      || filesArray.find((file) => file && file.name && file.name.endsWith('.mp4'));
+
       await Photos.destroy({ where: { movieId } });
       await Trailers.destroy({ where: { movieId } });
       await Actors.destroy({ where: { movieId } });
       await MovieCategories.destroy({ where: { movieId } });
+      await MovieStills.destroy({ where: { movieId } });
 
-      const {
-        title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors,
-      } = req.body;
-
-      const { photos, videos, actorPhotos } = sortFiles(req.files);
-      let photoUrl;
-      let trailerUrl;
-      const actorPhotoUrls = [];
-
-      if (photos.length > 0) {
-        const photoPath = path.resolve('public/moviePhotos', movie.photos[0].moviePhoto);
-        fs.unlinkSync(photoPath);
-        photoUrl = photos[0].filename;
-        fs.renameSync(photos[0].path, path.resolve('public/moviePhotos', photos[0].filename));
-      }
-
-      if (videos.length > 0) {
-        const videoPath = path.resolve('public/trailers', movie.trailers[0].trailer);
-        fs.unlinkSync(videoPath);
-        trailerUrl = videos[0].filename;
-        fs.renameSync(videos[0].path, path.resolve('public/trailers', videos[0].filename));
-      }
-
-      if (actorPhotos.length > 0) {
-        movie.actors.forEach((i) => {
-          const actorPhoto = path.resolve('public/actorPhotos', i.dataValues.photo);
-          fs.unlinkSync(actorPhoto);
-        });
-        actorPhotos.forEach((actorPhoto) => {
-          const actorPhotoUrl = actorPhoto.filename;
-          actorPhotoUrls.push(actorPhotoUrl);
-          fs.renameSync(actorPhoto.path, path.resolve('public/actorPhotos', actorPhoto.filename));
-        });
-      }
-
-      await Photos.create({
-        moviePhoto: photoUrl,
-        movieId,
-      });
-      await Trailers.create({
-        trailer: trailerUrl,
-        movieId,
-      });
-      await createMovieCategories(movieId, categories);
-      await createActors(movieId, actors, actorPhotoUrls);
       await movie.update({
         title,
         details,
@@ -228,17 +237,47 @@ class MovieC {
         duration,
         voters,
       });
+      const newPhotos = await Photos.create({
+        moviePhoto: photoFile.filename || photoFile.moviePhoto,
+        movieId,
+      });
+
+      const newTrailer = await Trailers.create({
+        trailer: trailerFile.name || trailerFile.trailer,
+        movieId,
+      });
+      const newCategory = await createMovieCategories(movieId, categoriesArray);
+
+      const actorPromises = actorArray.map(async (actor) => Actors.create({
+        name: actor.name,
+        photo: actor.photo,
+        movieId,
+      }));
+      const newActors = await Promise.all(actorPromises);
+
+      const stillPromises = stillArray.map(async (still) => MovieStills.create({
+        stillPath: still.stillPath,
+        movieId,
+      }));
+      const newStills = await Promise.all(stillPromises);
 
       res.json({
         message: 'Movie Data Updated Successfully!',
+        newMovie: movie,
+        newPhotos,
+        newTrailer,
+        newCategory,
+        newActors,
+        newStills,
       });
     } catch (e) {
+      console.error(e);
       next(e);
     }
   }
 
-  // ***** API FOR UPLOAD FILES *****
-  static async uploadFiles(req, res, next) {
+  // ***** API FOR UPLOAD ACTOR FILES *****
+  static async uploadActorFiles(req, res, next) {
     try {
       const { name } = req.body;
       const { file } = req;
@@ -248,6 +287,91 @@ class MovieC {
       };
       res.json({
         actor,
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+
+  // ***** API FOR UPLOAD STILLS FILES *****
+  static async uploadStillsFiles(req, res, next) {
+    try {
+      const { file } = req;
+      const stills = {
+        photo: file.filename,
+      };
+      res.json({
+        stills,
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+
+  // ***** API FOR UPLOAD TRAILER FILES *****
+  static async uploadTrailerFiles(req, res, next) {
+    try {
+      const { file } = req;
+      const trailer = {
+        trailer: file.filename,
+      };
+      res.json({
+        trailer,
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+
+  // ***** API FOR UPLOAD PHOTO FILES *****
+  static async uploadPhotoFiles(req, res, next) {
+    try {
+      const { file } = req;
+      const photo = {
+        photo: file.filename,
+      };
+      res.json({
+        photo,
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+
+  // ***** API FOR SINGLE MOVIE DATA *****
+  static async getSingleMovieData(req, res, next) {
+    try {
+      const { movieId } = req.params;
+      const movie = await Movies.findByPk(movieId, {
+        include: [
+          {
+            model: Photos,
+            as: 'photos',
+          },
+          {
+            model: Categories,
+            as: 'categories',
+          },
+          {
+            model: Trailers,
+            as: 'trailers',
+          },
+          {
+            model: Actors,
+            as: 'actors',
+          },
+          {
+            model: MovieStills,
+            as: 'stills',
+          },
+        ],
+      });
+      res.json({
+        movie,
       });
     } catch (e) {
       console.log(e);

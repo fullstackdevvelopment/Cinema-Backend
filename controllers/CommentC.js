@@ -4,22 +4,33 @@ class CommentC {
   // ***** API FOR GET LIST COMMENT *****
   static async getCommentList(req, res, next) {
     try {
-      const comments = await Comments.findAll({
+      const { page = 1, limit = 4 } = req.query;
+      const count = await Comments.count();
+
+      const list = await Comments.findAll({
         include: [
           {
             model: Users,
-            as: 'user',
+            as: 'users',
+            attributes: ['id', 'firstName', 'lastName', 'userName', 'email', 'photo'],
           },
           {
             model: Movies,
-            as: 'movie',
+            as: 'movies',
+            attributes: ['id', 'title'],
           },
         ],
       });
 
+      const totalPages = Math.ceil(count / limit);
+
       res.json({
-        message: 'Ok',
-        comments,
+        status: 'ok',
+        list,
+        limit,
+        page,
+        totalPages,
+        count,
       });
     } catch (e) {
       next(e);

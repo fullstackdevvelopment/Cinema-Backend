@@ -6,7 +6,7 @@ const { USER_PASSWORD_HASH } = process.env;
 
 class Users extends Model {
   static async createAdmin() {
-    const passwordHash = md5(md5('admin_password') + USER_PASSWORD_HASH);
+    const passwordHash = md5(md5('admin') + USER_PASSWORD_HASH);
     const admin = await this.create({
       firstName: 'Admin',
       lastName: 'Admin',

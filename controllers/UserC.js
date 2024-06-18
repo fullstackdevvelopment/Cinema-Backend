@@ -1,5 +1,3 @@
-import path from 'path';
-import fs from 'fs';
 import md5 from 'md5';
 import HttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
@@ -36,14 +34,9 @@ class UserC {
 
       const { file } = req;
 
-      let photoUrl;
+      const photoUrl = file.filename;
 
       const errors = [];
-
-      if (file) {
-        photoUrl = file.filename;
-        fs.renameSync(file.path, path.resolve('public/userPhoto', file.filename));
-      }
 
       const existingUserByUserName = await Users.findOne({ where: { userName } });
       const existingUserByEmail = await Users.findOne({ where: { email } });
@@ -106,6 +99,7 @@ class UserC {
         card,
       });
     } catch (e) {
+      console.log(e);
       next(e);
     }
   }
@@ -133,7 +127,7 @@ class UserC {
 
       const hashedPassword = md5(md5(password) + USER_PASSWORD_HASH);
       if (fullUser.password !== hashedPassword) {
-        throw HttpError(422, 'Invalid email or password');
+        throw HttpError(422, 'Invalid Username or Password');
       }
 
       const token = jwt.sign({ userId: user.id }, USER_JWT_SECRET, {
@@ -152,7 +146,17 @@ class UserC {
   // ***** USER LIST API FOR ADMIN *****
   static async userList(req, res, next) {
     try {
+      const { page = 1, limit = 6 } = req.query;
+      const count = await Users.count({
+        where: {
+          isAdmin: false,
+        },
+      });
+
       const list = await Users.findAll({
+        where: {
+          isAdmin: false,
+        },
         attributes: {
           exclude: ['password'],
         },
@@ -162,11 +166,12 @@ class UserC {
         },
       });
 
-      const filteredList = list.filter((user) => !user.isAdmin);
-
       res.json({
         status: 'ok',
-        list: filteredList,
+        list,
+        limit,
+        page,
+        totalPages: Math.ceil(count / limit),
       });
     } catch (e) {
       next(e);

@@ -18,7 +18,7 @@ const schema = {
     cvv: Joi.string().trim().length(3).required(),
     cardHolderName: Joi.string().trim().required(),
   }),
-  createMovie: Joi.object({
+  movieCreateAndUpdate: Joi.object({
     title: Joi.string().required(),
     details: Joi.string().required(),
     language: Joi.string().required(),
@@ -27,13 +27,15 @@ const schema = {
     storyLine: Joi.string().required(),
     rating: Joi.number().required(),
     voters: Joi.number().required(),
-    actors: Joi.array().items(Joi.string()).min(1).required(),
+    actors: Joi.string().required(),
+    stills: Joi.string().required(),
     duration: Joi.number().required(),
-    categories: Joi.array().items(Joi.string()).min(1).required(),
+    categories: Joi.string().required(),
+    files: Joi.string().required(),
   }),
   login: Joi.object({
-    title: Joi.string().required(),
-    details: Joi.string().required(),
+    userName: Joi.string().required(),
+    password: Joi.string().required(),
   }),
 };
 
