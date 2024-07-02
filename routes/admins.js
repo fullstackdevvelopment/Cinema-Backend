@@ -16,6 +16,7 @@ const router = Router();
 router.post('/login', UserC.login);
 
 router.get('/schedule/list', isAdminM, ScheduleC.scheduleList);
+router.post('/schedule/create', isAdminM, validateM(schema.createSchedule), ScheduleC.createSchedule);
 
 // ***** DASHBOARD API ***** // ***** USERS LIST API *****
 router.get('/booking/list', isAdminM, BookingC.getBookingList);
