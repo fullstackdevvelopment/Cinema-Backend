@@ -9,3 +9,4 @@ export { default as Photos } from './Photos.js';
 export { default as Trailers } from './Trailers.js';
 export { default as Actors } from './Actors.js';
 export { default as MovieStills } from './MovieStills.js';
+export { default as Schedule } from './Schedule.js';

@@ -37,6 +37,10 @@ const schema = {
     userName: Joi.string().required(),
     password: Joi.string().required(),
   }),
+  createSchedule: Joi.object({
+    movieId: Joi.number().integer().positive().required(),
+    showTime: Joi.string().required(),
+  }),
 };
 
 export default schema;

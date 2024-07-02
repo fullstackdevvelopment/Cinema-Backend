@@ -7,6 +7,7 @@ const EXCLUDE = [
   'POST:/users/login',
   'POST:/users/forgot',
   'POST:/admins/login',
+  'GET:/schedule/list',
   'GET:/',
 ];
 

@@ -8,11 +8,14 @@ import CategoryC from '../controllers/CategoryC.js';
 import CommentC from '../controllers/CommentC.js';
 import UserC from '../controllers/UserC.js';
 import upload from '../middlewares/multerM.js';
+import ScheduleC from '../controllers/ScheduleC.js';
 
 const router = Router();
 
 // ***** LOGIN API FOR ADMIN *****
 router.post('/login', UserC.login);
+
+router.get('/schedule/list', isAdminM, ScheduleC.scheduleList);
 
 // ***** DASHBOARD API ***** // ***** USERS LIST API *****
 router.get('/booking/list', isAdminM, BookingC.getBookingList);

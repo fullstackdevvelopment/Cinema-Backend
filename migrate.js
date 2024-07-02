@@ -9,7 +9,7 @@ import {
   Trailers,
   Actors,
   MovieCategories,
-  MovieStills,
+  MovieStills, Schedule,
 } from './models/index.js';
 
 async function main() {
@@ -24,6 +24,7 @@ async function main() {
   await Trailers.sync({ alter: true, logging: true });
   await Actors.sync({ alter: true, logging: true });
   await MovieStills.sync({ alter: true, logging: true });
+  await Schedule.sync({ alter: true, logging: true });
   process.exit(0);
 }
 
