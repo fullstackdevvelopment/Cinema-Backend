@@ -143,6 +143,28 @@ class UserC {
     }
   }
 
+  // ***** USER SINGLE DATA *****
+  static async userData(req, res, next) {
+    try {
+      const token = Object.keys(req.body)[0];
+      const decodedToken = jwt.verify(token, USER_JWT_SECRET);
+      console.log(decodedToken);
+      const { userId } = decodedToken;
+
+      const user = await Users.findByPk(userId);
+
+      if (!user) {
+        throw new HttpError(404, 'User Not Found');
+      }
+
+      res.json({
+        user,
+      });
+    } catch (e) {
+      next(e);
+    }
+  }
+
   // ***** USER LIST API FOR ADMIN *****
   static async userList(req, res, next) {
     try {

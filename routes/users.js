@@ -9,6 +9,7 @@ const router = Router();
 // ***** PUBLIC ROUTES *****
 router.post('/register', upload.single('photo'), validateM(schema.createUser), UserC.register);
 router.post('/login', validateM(schema.login), UserC.login);
+router.post('/single', UserC.userData);
 
 // ***** PRIVATE ROUTES ***** NEED TOKEN *****
 router.put('/update', UserC.userUpdate);
