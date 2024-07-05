@@ -29,7 +29,7 @@ const schema = {
     voters: Joi.number().required(),
     actors: Joi.string().required(),
     stills: Joi.string().required(),
-    duration: Joi.number().required(),
+    duration: Joi.string().required(),
     categories: Joi.string().required(),
     files: Joi.string().required(),
   }),
