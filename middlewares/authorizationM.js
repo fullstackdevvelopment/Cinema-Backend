@@ -8,6 +8,8 @@ const EXCLUDE = [
   'POST:/users/forgot',
   'POST:/admins/login',
   'GET:/schedule/list',
+  'GET:/movie/list',
+  /^GET:\/movie\/single\/\d+$/,
   'GET:/',
 ];
 
@@ -17,8 +19,9 @@ function authorizationM(req, res, next) {
   try {
     const { method, path } = req;
     const authorization = req.headers.authorization || req.headers.Authorization;
+    console.log(method, path);
 
-    if (method === 'OPTIONS' || EXCLUDE.includes(`${method}:${path}`)) {
+    if (method === 'OPTIONS' || EXCLUDE.some((pattern) => (pattern instanceof RegExp ? pattern.test(`${method}:${path}`) : pattern === `${method}:${path}`))) {
       next();
       return;
     }
