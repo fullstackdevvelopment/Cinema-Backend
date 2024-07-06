@@ -131,6 +131,10 @@ class MovieC {
             model: Actors,
             as: 'actors',
           },
+          {
+            model: MovieStills,
+            as: 'stills',
+          },
         ],
       });
 

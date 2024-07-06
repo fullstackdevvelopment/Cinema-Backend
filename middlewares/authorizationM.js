@@ -5,7 +5,6 @@ const EXCLUDE = [
   'POST:/users/register',
   'GET:/users/list',
   'POST:/users/login',
-  'POST:/users/forgot',
   'POST:/admins/login',
   'GET:/schedule/list',
   'GET:/movie/list',
