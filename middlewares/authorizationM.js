@@ -8,6 +8,7 @@ const EXCLUDE = [
   'POST:/admins/login',
   'GET:/schedule/list',
   'GET:/movie/list',
+  'GET:/category/list',
   /^GET:\/movie\/single\/\d+$/,
   'GET:/',
 ];
