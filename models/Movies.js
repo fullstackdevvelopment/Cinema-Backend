@@ -44,7 +44,7 @@ Movies.init(
       allowNull: false,
     },
     duration: {
-      type: DataTypes.FLOAT,
+      type: DataTypes.STRING,
       allowNull: false,
     },
   },

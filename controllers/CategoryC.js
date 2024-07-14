@@ -44,7 +44,6 @@ class CategoryC {
   static async getCategoryList(req, res, next) {
     try {
       const list = await Categories.findAll();
-      console.log(list);
       res.json({
         list,
       });

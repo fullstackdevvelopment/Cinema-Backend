@@ -382,6 +382,31 @@ class MovieC {
       next(e);
     }
   }
+
+  // ***** API FOR GET MOVIE COUNTRIES *****
+  static async getMovieCountries(req, res, next) {
+    try {
+      const movies = await Movies.findAll();
+
+      const countrySet = new Set();
+
+      movies.forEach((movie) => {
+        const countries = movie.details.split(',').map((country) => country.trim());
+        countries.forEach((country) => {
+          countrySet.add(country);
+        });
+      });
+
+      const list = Array.from(countrySet);
+
+      res.json({
+        list,
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
 }
 
 export default MovieC;
