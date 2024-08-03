@@ -13,10 +13,12 @@ import ScheduleC from '../controllers/ScheduleC.js';
 const router = Router();
 
 // ***** LOGIN API FOR ADMIN *****
-router.post('/login', UserC.login);
+router.post('/login', UserC.loginAdmin);
+router.get('/data', isAdminM, UserC.adminData);
 
 router.get('/schedule/list', isAdminM, ScheduleC.scheduleList);
 router.post('/schedule/create', isAdminM, validateM(schema.createSchedule), ScheduleC.createSchedule);
+router.put('/schedule/delete/:scheduleId', isAdminM, ScheduleC.deleteSchedule);
 
 // ***** DASHBOARD API ***** // ***** USERS LIST API *****
 router.get('/booking/list', isAdminM, BookingC.getBookingList);
@@ -33,6 +35,7 @@ router.post('/movie/create', isAdminM, validateM(schema.movieCreateAndUpdate), M
 router.get('/movie/list', MovieC.getMovieList);
 router.put('/movie/change/:movieId', isAdminM, validateM(schema.movieCreateAndUpdate), MovieC.changeMovie);
 router.get('/movie/single/:movieId', isAdminM, MovieC.getSingleMovieData);
+router.put('/movie/delete/:movieId', isAdminM, MovieC.deleteMovie);
 
 router.post('/category/create', isAdminM, CategoryC.createCategory);
 router.put('/category/delete/:categoryId', isAdminM, CategoryC.deleteCategory);

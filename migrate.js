@@ -9,7 +9,7 @@ import {
   Trailers,
   Actors,
   MovieCategories,
-  MovieStills, Schedule,
+  MovieStills, Schedule, Rows, Seats, Payment, PendingUsers, PendingPassword,
 } from './models/index.js';
 
 async function main() {
@@ -25,6 +25,11 @@ async function main() {
   await Actors.sync({ alter: true, logging: true });
   await MovieStills.sync({ alter: true, logging: true });
   await Schedule.sync({ alter: true, logging: true });
+  await Rows.sync({ alter: true, logging: true });
+  await Seats.sync({ alter: true, logging: true });
+  await Payment.sync({ alter: true, logging: true });
+  await PendingUsers.sync({ alter: true, logging: true });
+  await PendingPassword.sync({ alter: true, logging: true });
   process.exit(0);
 }
 

@@ -10,7 +10,17 @@ const upload = multer({
       cb(null, fileName);
     },
     fileFilter: (req, file, cb) => {
-      const allowedMimeTypes = ['image/png', 'image/jpeg', 'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo', 'video/x-ms-wmv'];
+      const allowedMimeTypes = [
+        'image/png',
+        'image/webp',
+        'image/jpeg',
+        'video/mp4',
+        'video/mpeg',
+        'video/quicktime',
+        'video/x-msvideo',
+        'video/x-ms-wmv',
+        'application/pdf',
+      ];
       if (allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true);
       } else {

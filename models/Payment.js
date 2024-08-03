@@ -2,9 +2,9 @@ import { DataTypes, Model } from 'sequelize';
 import sequelize from '../services/sequelize.js';
 import Users from './Users.js';
 
-class Cards extends Model {}
+class Payment extends Model {}
 
-Cards.init(
+Payment.init(
   {
     id: {
       type: DataTypes.BIGINT.UNSIGNED,
@@ -12,58 +12,45 @@ Cards.init(
       autoIncrement: true,
       allowNull: false,
     },
-    cardNumber: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    expirationDate: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    cvv: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    cardHolderName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
-    balance: {
+    amount: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0,
+    },
+    currency: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    stripePaymentId: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {
     sequelize,
-    tableName: 'cards',
-    modelName: 'cards',
+    tableName: 'payments',
+    modelName: 'payments',
     indexes: [
-      { fields: ['cardNumber'], unique: true },
-      { fields: ['cvv'], unique: true },
+      { fields: ['stripePaymentId'], unique: true },
     ],
   },
 );
 
-Cards.belongsTo(Users, {
+Payment.belongsTo(Users, {
   foreignKey: 'userId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
   as: 'users',
 });
 
-Users.hasMany(Cards, {
+Users.hasMany(Payment, {
   foreignKey: 'userId',
   onDelete: 'cascade',
   onUpdate: 'cascade',
-  as: 'cards',
+  as: 'payments',
 });
 
-Users.hasOne(Cards, {
-  foreignKey: 'userId',
-  onDelete: 'cascade',
-  onUpdate: 'cascade',
-  as: 'card',
-});
-
-export default Cards;
+export default Payment;

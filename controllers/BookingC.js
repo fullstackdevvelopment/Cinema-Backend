@@ -1,5 +1,6 @@
+import HttpError from 'http-errors';
 import {
-  Bookings, Movies, Photos, Users,
+  Bookings, Movies, Photos, Users, Rows, Seats, Cards,
 } from '../models/index.js';
 
 class BookingC {
@@ -113,6 +114,76 @@ class BookingC {
         totalPages,
       });
     } catch (e) {
+      next(e);
+    }
+  }
+
+  // ***** BOOKING CREATE API *****
+  static async createBooking(req, res, next) {
+    try {
+      const bookingData = req.body;
+
+      if (!bookingData) {
+        throw new HttpError(404, 'BookingData not found');
+      }
+
+      for (const booking of bookingData) {
+        // eslint-disable-next-line no-await-in-loop
+        const card = await Cards.findOne({
+          where: {
+            userId: booking.userId,
+          },
+        });
+
+        if (card) {
+          card.balance -= booking.ticketPrice;
+          // eslint-disable-next-line no-await-in-loop
+          await card.save();
+        }
+      }
+
+      const newBookings = await Promise.all(
+        bookingData.map((booking) => Bookings.create({
+          userId: booking.userId,
+          movieId: booking.movieId,
+          bookingRow: booking.bookingRow,
+          seatNumber: booking.seatNumber,
+          status: booking.status,
+          ticketPrice: booking.ticketPrice,
+        })),
+      );
+
+      const rows = await Promise.all(
+        bookingData.map((booking) => Rows.findAll({
+          where: {
+            scheduleId: booking.scheduleId,
+            rowName: booking.bookingRow,
+            seatCount: booking.seatNumber,
+          },
+        })),
+      );
+
+      const seats = await Promise.all(
+        rows.flat().map((row) => Seats.findAll({
+          where: {
+            rowId: row.id,
+            status: 'Available',
+          },
+        })),
+      );
+
+      await Promise.all(
+        seats.flat().map((seat) => seat.update({
+          status: 'Booked',
+        })),
+      );
+
+      res.json({
+        status: 'ok',
+        newBookings,
+      });
+    } catch (e) {
+      console.log(e);
       next(e);
     }
   }

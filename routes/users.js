@@ -10,6 +10,10 @@ const router = Router();
 router.post('/register', upload.single('photo'), validateM(schema.createUser), UserC.register);
 router.post('/login', validateM(schema.login), UserC.login);
 router.post('/single', UserC.userData);
+router.post('/verifications', UserC.userVerification);
+router.post('/reset/password', validateM(schema.resetPassword), UserC.resetPassword);
+router.post('/reset/password/:verificationCode', validateM(schema.resetPasswordFinished), UserC.resetPasswordFinished);
+router.post('/pdf/upload', upload.single('pdf'), UserC.ticketPdfUpload);
 
 // ***** PRIVATE ROUTES ***** NEED TOKEN *****
 router.put('/update', UserC.userUpdate);

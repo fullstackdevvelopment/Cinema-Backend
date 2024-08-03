@@ -10,3 +10,8 @@ export { default as Trailers } from './Trailers.js';
 export { default as Actors } from './Actors.js';
 export { default as MovieStills } from './MovieStills.js';
 export { default as Schedule } from './Schedule.js';
+export { default as Seats } from './Seats.js';
+export { default as Rows } from './Rows.js';
+export { default as Payment } from './Payment.js';
+export { default as PendingUsers } from './PendingUsers.js';
+export { default as PendingPassword } from './PendingPassword.js';

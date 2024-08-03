@@ -6,6 +6,7 @@ import http from 'http';
 import corsM from './middlewares/corsM.js';
 import routes from './routes/index.js';
 import authorizationM from './middlewares/authorizationM.js';
+import payment from './routes/payment.js';
 
 const { PORT } = process.env;
 
@@ -13,10 +14,14 @@ const app = express();
 
 app.use(corsM);
 app.use(express.static(path.resolve('public')));
+app.use(express.static(path.resolve('tickets')));
 app.use(authorizationM);
 app.use(morgan('dev'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+app.use('/api/payment', payment);
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), payment);
 
 app.use(routes);
 

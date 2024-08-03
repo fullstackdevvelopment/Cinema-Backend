@@ -10,8 +10,11 @@
     "prod": "nodemon -r dotenv/config app.js"
   },
   "dependencies": {
+    "axios": "^1.7.3",
     "bluebird": "^3.7.2",
     "cls-hooked": "^4.2.2",
+    "crypto": "^1.0.1",
+    "date-fns": "^3.6.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "googleapis": "^133.0.0",
@@ -24,9 +27,11 @@
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "mysql2": "^3.7.0",
-    "nodemailer": "^6.9.9",
+    "nodemailer": "^6.9.14",
     "papaparse": "^5.4.1",
+    "pdf-lib": "^1.17.1",
     "sequelize": "^6.35.2",
+    "sharp": "^0.33.4",
     "socket.io": "^4.7.4",
     "uuid": "^9.0.1"
   },
@@ -34,6 +39,7 @@
     "eslint": "^8.56.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.29.1",
-    "nodemon": "^3.0.2"
+    "nodemon": "^3.0.2",
+    "stripe": "^16.2.0"
   }
 }

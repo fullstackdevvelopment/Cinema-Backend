@@ -76,15 +76,29 @@ Users.init(
       allowNull: false,
       defaultValue: false,
     },
+    status: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: 'pending',
+    },
   },
   {
     sequelize,
     tableName: 'users',
     modelName: 'users',
     indexes: [
-      { fields: ['userName'], unique: true },
-      { fields: ['email'], unique: true },
-      { fields: ['phone'], unique: true },
+      {
+        fields: ['userName'],
+        unique: true,
+      },
+      {
+        fields: ['email'],
+        unique: true,
+      },
+      {
+        fields: ['phone'],
+        unique: true,
+      },
     ],
   },
 );

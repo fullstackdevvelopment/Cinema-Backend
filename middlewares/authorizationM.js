@@ -12,6 +12,11 @@ const EXCLUDE = [
   'GET:/category/list',
   'GET:/schedule/list',
   /^GET:\/movie\/single\/\d+$/,
+  /^GET:\/review\/list\/\d+$/,
+  'POST:/email/send',
+  'POST:/users/verifications',
+  'POST:/users/reset/password',
+  /^POST:\/users\/reset\/password\/[0-9a-fA-F]+$/,
   'GET:/',
 ];
 
@@ -21,16 +26,20 @@ function authorizationM(req, res, next) {
   try {
     const { method, path } = req;
     const authorization = req.headers.authorization || req.headers.Authorization;
-    console.log(method, path);
 
     if (method === 'OPTIONS' || EXCLUDE.some((pattern) => (pattern instanceof RegExp ? pattern.test(`${method}:${path}`) : pattern === `${method}:${path}`))) {
       next();
       return;
     }
+
+    if (!authorization) {
+      throw HttpError(401, 'Authorization header missing');
+    }
+
     const token = authorization.replace('Bearer ', '');
 
     if (!token) {
-      throw HttpError(401);
+      throw HttpError(401, 'Token missing');
     }
 
     const decoded = jwt.verify(token, USER_JWT_SECRET);

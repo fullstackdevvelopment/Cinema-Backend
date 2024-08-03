@@ -1,7 +1,17 @@
 import HttpError from 'http-errors';
 import {
-  Actors, Categories, MovieCategories, Movies, MovieStills, Photos, Trailers,
+  Actors,
+  Bookings,
+  Categories,
+  Comments,
+  MovieCategories,
+  Movies,
+  MovieStills,
+  Photos,
+  Schedule,
+  Trailers,
 } from '../models/index.js';
+import sequelize from '../services/sequelize.js';
 
 const createMovieCategories = async (movieId, categoryIds) => {
   const movieCategoryData = categoryIds.map((categoryId) => ({
@@ -19,31 +29,6 @@ class MovieC {
         title, details, language, releaseDate, director, storyLine,
         rating, duration, voters, categories, actors, stills, files,
       } = req.body;
-
-      if (!title || !details || !language || !releaseDate || !director || !storyLine
-        || rating == null || !duration || !voters || !categories || !actors || !stills || !files) {
-        let errorMessage = 'Missing required fields: ';
-        if (!title) errorMessage += 'Title, ';
-        if (!details) errorMessage += 'Details, ';
-        if (!language) errorMessage += 'Language, ';
-        if (!releaseDate) errorMessage += 'Release Date, ';
-        if (!director) errorMessage += 'Director, ';
-        if (!storyLine) errorMessage += 'Story Line, ';
-        if (rating == null) errorMessage += 'Rating, ';
-        if (!duration) errorMessage += 'Duration, ';
-        if (!voters) errorMessage += 'Voters, ';
-        if (!categories) errorMessage += 'Categories, ';
-        if (!actors) errorMessage += 'Actors, ';
-        if (!stills) errorMessage += 'Stills, ';
-        if (!files) errorMessage += 'Files, ';
-
-        errorMessage = errorMessage.slice(0, -2);
-
-        next({
-          status: 400,
-          message: errorMessage,
-        });
-      }
 
       const actorArray = JSON.parse(actors);
       const stillArray = JSON.parse(stills);
@@ -106,83 +91,13 @@ class MovieC {
     }
   }
 
-  // ***** GET MOVIE LIST API ONLY FOR ADMIN *****
-  static async getMovieList(req, res, next) {
-    try {
-      const { page = 1, limit = 6 } = req.query;
-
-      const count = await Movies.count();
-
-      const list = await Movies.findAll({
-        include: [
-          {
-            model: Photos,
-            as: 'photos',
-          },
-          {
-            model: Categories,
-            as: 'categories',
-          },
-          {
-            model: Trailers,
-            as: 'trailers',
-          },
-          {
-            model: Actors,
-            as: 'actors',
-          },
-          {
-            model: MovieStills,
-            as: 'stills',
-          },
-        ],
-      });
-
-      const totalPages = Math.ceil(count / limit);
-
-      res.json({
-        list,
-        limit,
-        page,
-        totalPages,
-      });
-    } catch (e) {
-      next(e);
-    }
-  }
-
-  // ***** GET MOVIE LIST API ONLY FOR ADMIN *****
+  // ***** UPDATE MOVIE API ONLY FOR ADMIN *****
   static async changeMovie(req, res, next) {
     try {
       const {
         title, details, language, releaseDate, director, storyLine,
         rating, duration, voters, categories, actors, stills, files,
       } = req.body;
-
-      if (!title || !details || !language || !releaseDate || !director || !storyLine
-        || rating == null || !duration || !voters || !categories || !actors || !stills || !files) {
-        let errorMessage = 'Missing required fields: ';
-        if (!title) errorMessage += 'Title, ';
-        if (!details) errorMessage += 'Details, ';
-        if (!language) errorMessage += 'Language, ';
-        if (!releaseDate) errorMessage += 'Release Date, ';
-        if (!director) errorMessage += 'Director, ';
-        if (!storyLine) errorMessage += 'Story Line, ';
-        if (rating == null) errorMessage += 'Rating, ';
-        if (!duration) errorMessage += 'Duration, ';
-        if (!voters) errorMessage += 'Voters, ';
-        if (!categories) errorMessage += 'Categories, ';
-        if (!actors) errorMessage += 'Actors, ';
-        if (!stills) errorMessage += 'Stills, ';
-        if (!files) errorMessage += 'Files, ';
-
-        errorMessage = errorMessage.slice(0, -2);
-
-        next({
-          status: 400,
-          message: errorMessage,
-        });
-      }
 
       const { movieId } = req.params;
       const movie = await Movies.findByPk(movieId, {
@@ -217,12 +132,12 @@ class MovieC {
 
       const photoFile = filesArray.find((file) => file && file.mimetype && file.mimetype.startsWith('image/'))
         || filesArray.find((file) => file && file.moviePhoto && (file.moviePhoto.endsWith('.png')
-        || file.moviePhoto.endsWith('.webp') || file.moviePhoto.endsWith('.jpg')));
+          || file.moviePhoto.endsWith('.webp') || file.moviePhoto.endsWith('.jpg')));
 
       const trailerFile = filesArray.find((file) => file && file.mimetype && file.mimetype.startsWith('video/'))
         || filesArray.find((file) => file && file.type && file.type.startsWith('video/'))
         || filesArray.find((file) => file && file.trailer && file.trailer.endsWith('.mp4'))
-      || filesArray.find((file) => file && file.name && file.name.endsWith('.mp4'));
+        || filesArray.find((file) => file && file.name && file.name.endsWith('.mp4'));
 
       await Photos.destroy({ where: { movieId } });
       await Trailers.destroy({ where: { movieId } });
@@ -276,6 +191,117 @@ class MovieC {
       });
     } catch (e) {
       console.error(e);
+      next(e);
+    }
+  }
+
+  // ***** DELETE MOVIE API ONLY FOR ADMIN
+  static async deleteMovie(req, res, next) {
+    try {
+      const { movieId } = req.params;
+
+      if (!movieId) {
+        throw HttpError(400, 'movieId not provided');
+      }
+
+      const movie = await Movies.findByPk(movieId, {
+        include: [
+          {
+            model: Photos,
+            as: 'photos',
+          },
+          {
+            model: Categories,
+            as: 'categories',
+          },
+          {
+            model: Trailers,
+            as: 'trailers',
+          },
+          {
+            model: Actors,
+            as: 'actors',
+          },
+        ],
+      });
+
+      if (!movie) {
+        throw HttpError(404, 'Movie not found');
+      }
+
+      const transaction = await sequelize.transaction();
+
+      try {
+        await Movies.destroy({ where: { id: movieId }, transaction });
+        await Photos.destroy({ where: { movieId }, transaction });
+        await Trailers.destroy({ where: { movieId }, transaction });
+        await Actors.destroy({ where: { movieId }, transaction });
+        await MovieCategories.destroy({ where: { movieId }, transaction });
+        await MovieStills.destroy({ where: { movieId }, transaction });
+        await Bookings.destroy({ where: { movieId }, transaction });
+        await Comments.destroy({ where: { movieId }, transaction });
+        await Schedule.destroy({ where: { movieId }, transaction });
+
+        await transaction.commit();
+        res.status(200).json({
+          message: 'Movie deleted successfully!',
+        });
+      } catch (error) {
+        await transaction.rollback();
+        throw error;
+      }
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  // ***** GET MOVIE LIST API ONLY FOR ADMIN *****
+  static async getMovieList(req, res, next) {
+    try {
+      const { page = 1, limit = 6 } = req.query;
+
+      const count = await Movies.count();
+
+      const list = await Movies.findAll({
+        include: [
+          {
+            model: Photos,
+            as: 'photos',
+          },
+          {
+            model: Categories,
+            as: 'categories',
+          },
+          {
+            model: Trailers,
+            as: 'trailers',
+          },
+          {
+            model: Actors,
+            as: 'actors',
+          },
+          {
+            model: MovieStills,
+            as: 'stills',
+          },
+        ],
+      });
+
+      const totalPages = Math.ceil(count / limit);
+
+      list.forEach((movie) => {
+        if (movie.stills) {
+          movie.stills.sort((a, b) => a.id - b.id);
+        }
+      });
+
+      res.json({
+        list,
+        limit,
+        page,
+        totalPages,
+      });
+    } catch (e) {
       next(e);
     }
   }
