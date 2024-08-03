@@ -283,7 +283,7 @@ class UserC {
     }
   }
 
-  // ***** USER LOGIN API *****
+  // ***** ADMIN LOGIN API *****
   static async loginAdmin(req, res, next) {
     try {
       const {
@@ -325,23 +325,6 @@ class UserC {
       next(e);
     }
   }
-
-  // ***** DELETE USER API ONLY ADMIN *****
-  // static async deleteUser(req, res, next) {
-  //   try {
-  //     const { userId } = req.params;
-  //
-  //     if (!userId) {
-  //       throw HttpError(404, 'userId not found');
-  //     }
-  //
-  //     const user = await Users.findByPk(userId, {
-  //
-  //     });
-  //   } catch (e) {
-  //     next(e);
-  //   }
-  // }
 
   // ***** USER SINGLE DATA *****
   static async userData(req, res, next) {
@@ -440,25 +423,27 @@ class UserC {
         firstName,
         lastName,
         email,
-        password,
         city,
         country,
         address,
         phone,
       } = req.body;
 
-      const { userId } = req;
+      const { file, userId } = req;
+
+      const photoUrl = file?.filename;
 
       const user = await Users.findByPk(userId);
       if (user) {
         user.firstName = firstName || user.firstName;
         user.lastName = lastName || user.lastName;
         user.email = email || user.email;
-        user.password = password || user.password;
         user.city = city || user.city;
         user.country = country || user.country;
         user.address = address || user.address;
         user.phone = phone || user.phone;
+        user.photo = photoUrl || user.photo;
+        user.updatedAt = new Date();
 
         const updatedUser = await user.save();
         res.json({

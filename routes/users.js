@@ -16,6 +16,6 @@ router.post('/reset/password/:verificationCode', validateM(schema.resetPasswordF
 router.post('/pdf/upload', upload.single('pdf'), UserC.ticketPdfUpload);
 
 // ***** PRIVATE ROUTES ***** NEED TOKEN *****
-router.put('/update', UserC.userUpdate);
+router.put('/update', upload.single('photo'), validateM(schema.updateUser), UserC.userUpdate);
 
 export default router;

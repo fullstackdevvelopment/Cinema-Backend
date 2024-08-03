@@ -155,6 +155,79 @@ const schema = {
         'any.required': 'Card Holder Name is required',
       }),
   }),
+  updateUser: Joi.object({
+    firstName: Joi.string()
+      .trim()
+      .min(3)
+      .regex(/^[A-Z][a-z]*$/)
+      .required()
+      .messages({
+        'string.empty': 'FirstName must not be empty',
+        'string.pattern.base': 'FirstName must start with an uppercase letter and contain only Latin letters. Minimum 3 Symbols',
+        'any.required': 'FirstName is required',
+      }),
+
+    lastName: Joi.string()
+      .trim()
+      .min(3)
+      .regex(/^[A-Z][a-z]*$/)
+      .required()
+      .messages({
+        'string.empty': 'LastName must not be empty',
+        'string.pattern.base': 'LastName must start with an uppercase letter and contain only Latin letters. Minimum 3 Symbols',
+        'any.required': 'LastName is required',
+      }),
+
+    email: Joi.string()
+      .email()
+      .trim()
+      .lowercase()
+      .required()
+      .messages({
+        'string.empty': 'Email must not be empty',
+        'string.email': 'Email must be a valid email address.',
+        'any.required': 'Email is required',
+      }),
+
+    city: Joi.string()
+      .trim()
+      .min(2)
+      .required()
+      .messages({
+        'string.empty': 'City must not be empty',
+        'any.required': 'City is required',
+      }),
+
+    country: Joi.string()
+      .trim()
+      .min(2)
+      .required()
+      .messages({
+        'string.empty': 'Country must not be empty',
+        'any.required': 'Country is required',
+      }),
+
+    address: Joi.string()
+      .trim()
+      .min(2)
+      .required()
+      .messages({
+        'string.empty': 'Address must not be empty',
+        'any.required': 'Address is required',
+      }),
+
+    phone: Joi.string()
+      .trim()
+      .length(12)
+      .pattern(/^\+374\d{8}$/)
+      .required()
+      .messages({
+        'string.empty': 'Phone number must not be empty',
+        'string.length': 'The phone number must contain exactly 12 characters',
+        'string.pattern.base': 'Phone number must start with +374 and contain 8 digits after the country code',
+        'any.required': 'Phone number is required',
+      }),
+  }),
   movieCreateAndUpdate: Joi.object({
     title: Joi.string()
       .required()
