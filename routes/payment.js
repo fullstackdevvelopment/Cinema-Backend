@@ -4,6 +4,7 @@ import authM from '../middlewares/authM.js';
 
 const router = Router();
 
+// ***** PAYMENT API *****
 router.post('/create-payment-intent', authM, PaymentController.createPaymentIntent);
 router.post('/update-payment-status', PaymentController.updatePaymentStatus);
 router.post('/webhook', express.raw({ type: 'application/json' }), PaymentController.handleWebhook);

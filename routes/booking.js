@@ -4,6 +4,7 @@ import TicketPDFC from '../controllers/TicketPDFC.js';
 
 const router = Router();
 
+// ***** BOOKING API *****
 router.post('/create', BookingC.createBooking);
 router.post('/finalize', TicketPDFC.finalizeBooking);
 

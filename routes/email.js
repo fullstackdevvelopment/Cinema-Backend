@@ -5,6 +5,7 @@ import validateM from '../middlewares/validateM.js';
 
 const router = Router();
 
+// ***** EMAIL API *****
 router.post('/send', validateM(schema.sendEmail), EmailC.sendEmail);
 
 export default router;
