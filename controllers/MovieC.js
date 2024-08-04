@@ -27,7 +27,7 @@ class MovieC {
     try {
       const {
         title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors, stills, files,
+        rating, duration, voters, categories, actors, stills, files, status,
       } = req.body;
 
       const actorArray = JSON.parse(actors);
@@ -50,6 +50,7 @@ class MovieC {
         rating,
         duration,
         voters,
+        status,
       });
 
       const newPhotos = await Photos.create({
@@ -96,7 +97,7 @@ class MovieC {
     try {
       const {
         title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors, stills, files,
+        rating, duration, voters, categories, actors, stills, files, status,
       } = req.body;
 
       const { movieId } = req.params;
@@ -155,6 +156,7 @@ class MovieC {
         rating,
         duration,
         voters,
+        status,
       });
       const newPhotos = await Photos.create({
         moviePhoto: photoFile.filename || photoFile.moviePhoto,

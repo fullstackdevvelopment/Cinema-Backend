@@ -320,6 +320,15 @@ const schema = {
         'string.empty': 'Files are required',
         'any.required': 'Files are required',
       }),
+    status: Joi.string()
+      .valid('Latest', 'Coming Soon')
+      .required()
+      .messages({
+        'string.base': 'Status should be a type of text',
+        'string.empty': 'Status is required',
+        'any.only': 'Status must be either Latest or Coming Soon',
+        'any.required': 'Status is required',
+      }),
   }),
   login: Joi.object({
     userName: Joi.string()

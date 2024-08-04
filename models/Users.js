@@ -18,6 +18,7 @@ class Users extends Model {
       address: 'Admin Address',
       phone: '1234567890',
       photo: null,
+      status: 'active',
     });
     await admin.update({ isAdmin: true });
   }
