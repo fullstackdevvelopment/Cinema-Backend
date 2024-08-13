@@ -96,10 +96,6 @@ Users.init(
         fields: ['email'],
         unique: true,
       },
-      {
-        fields: ['phone'],
-        unique: true,
-      },
     ],
   },
 );

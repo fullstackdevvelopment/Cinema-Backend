@@ -6,6 +6,7 @@ const router = Router();
 
 // ***** PAYMENT API *****
 router.post('/create-payment-intent', authM, PaymentController.createPaymentIntent);
+router.post('/create-checkout-session', authM, PaymentController.createCheckoutSession);
 router.post('/update-payment-status', PaymentController.updatePaymentStatus);
 router.post('/webhook', express.raw({ type: 'application/json' }), PaymentController.handleWebhook);
 

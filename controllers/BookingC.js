@@ -1,6 +1,6 @@
 import HttpError from 'http-errors';
 import {
-  Bookings, Movies, Photos, Users, Rows, Seats, Cards,
+  Bookings, Movies, Photos, Users, Rows, Seats,
 } from '../models/index.js';
 
 class BookingC {
@@ -125,21 +125,6 @@ class BookingC {
 
       if (!bookingData) {
         throw new HttpError(404, 'BookingData not found');
-      }
-
-      for (const booking of bookingData) {
-        // eslint-disable-next-line no-await-in-loop
-        const card = await Cards.findOne({
-          where: {
-            userId: booking.userId,
-          },
-        });
-
-        if (card) {
-          card.balance -= booking.ticketPrice;
-          // eslint-disable-next-line no-await-in-loop
-          await card.save();
-        }
       }
 
       const newBookings = await Promise.all(

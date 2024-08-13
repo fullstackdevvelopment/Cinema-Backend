@@ -61,98 +61,32 @@ const schema = {
     city: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'City must not be empty',
-        'any.required': 'City is required',
       }),
 
     country: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'Country must not be empty',
-        'any.required': 'Country is required',
       }),
 
     address: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'Address must not be empty',
-        'any.required': 'Address is required',
       }),
 
     phone: Joi.string()
       .trim()
       .length(12)
       .pattern(/^\+374\d{8}$/)
-      .required()
       .messages({
         'string.empty': 'Phone number must not be empty',
         'string.length': 'The phone number must contain exactly 12 characters',
         'string.pattern.base': 'Phone number must start with +374 and contain 8 digits after the country code',
-        'any.required': 'Phone number is required',
-      }),
-
-    cardNumber: Joi.string()
-      .trim()
-      .length(16)
-      .pattern(/^\d{16}$/)
-      .required()
-      .messages({
-        'string.empty': 'Card Number must not be empty',
-        'string.length': 'Card Number must contain exactly 16 digits',
-        'string.pattern.base': 'Card Number must contain only digits',
-        'any.required': 'Card Number is required',
-      }),
-
-    selectedMonth: Joi.string()
-      .trim()
-      .length(2)
-      .pattern(/^(0[1-9]|1[0-2])$/)
-      .required()
-      .messages({
-        'string.empty': 'Card Month',
-        'string.length': '(01-12)',
-        'string.pattern.base': '(01-12)',
-        'any.required': 'Selected Month is required',
-      }),
-
-    selectedYear: Joi.string()
-      .trim()
-      .length(2)
-      .pattern(/^\d{2}$/)
-      .required()
-      .messages({
-        'string.empty': 'Card Year',
-        'string.length': 'Selected Year must contain exactly 2 characters',
-        'string.pattern.base': 'Selected Year must contain only digits',
-        'any.required': 'Selected Year is required',
-      }),
-
-    cvv: Joi.string()
-      .trim()
-      .length(3)
-      .pattern(/^\d{3}$/)
-      .required()
-      .messages({
-        'string.empty': 'Card CVC',
-        'string.length': 'CVV must contain exactly 3 digits',
-        'string.pattern.base': 'CVV must contain only digits',
-        'any.required': 'CVV is required',
-      }),
-
-    cardHolderName: Joi.string()
-      .trim()
-      .regex(/^[A-Z][a-z]*(?: [A-Z][a-z]*)*$/)
-      .required()
-      .messages({
-        'string.empty': 'Card Holder Name must not be empty',
-        'string.pattern.base': 'Card Holder Name must contain only letters and a single space between words',
-        'any.required': 'Card Holder Name is required',
       }),
   }),
   updateUser: Joi.object({
@@ -192,25 +126,20 @@ const schema = {
     city: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'City must not be empty',
-        'any.required': 'City is required',
       }),
 
     country: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'Country must not be empty',
-        'any.required': 'Country is required',
       }),
 
     address: Joi.string()
       .trim()
       .min(2)
-      .required()
       .messages({
         'string.empty': 'Address must not be empty',
         'any.required': 'Address is required',
@@ -220,12 +149,31 @@ const schema = {
       .trim()
       .length(12)
       .pattern(/^\+374\d{8}$/)
-      .required()
       .messages({
         'string.empty': 'Phone number must not be empty',
         'string.length': 'The phone number must contain exactly 12 characters',
         'string.pattern.base': 'Phone number must start with +374 and contain 8 digits after the country code',
         'any.required': 'Phone number is required',
+      }),
+
+    currentPassword: Joi.string()
+      .trim()
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:"|,.<>/?]).{8,}$/)
+      .messages({
+        'string.empty': 'Current Password must not be empty',
+        'string.min': 'The Current password must contain a minimum of 8 characters',
+        'string.pattern.base': 'The Current password must contain a minimum of 8 characters, at least one uppercase letter, one lowercase letter, one number and one special character',
+      }),
+
+    newPassword: Joi.string()
+      .trim()
+      .min(8)
+      .pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};:"|,.<>/?]).{8,}$/)
+      .messages({
+        'string.empty': 'New Password must not be empty',
+        'string.min': 'The New password must contain a minimum of 8 characters',
+        'string.pattern.base': 'The New password must contain a minimum of 8 characters, at least one uppercase letter, one lowercase letter, one number and one special character',
       }),
   }),
   movieCreateAndUpdate: Joi.object({
@@ -271,20 +219,6 @@ const schema = {
         'string.empty': 'Description is required',
         'any.required': 'Description is required',
       }),
-    rating: Joi.number()
-      .required()
-      .messages({
-        'number.base': 'Rating should be a number',
-        'number.empty': 'Rating is required',
-        'any.required': 'Rating is required',
-      }),
-    voters: Joi.number()
-      .required()
-      .messages({
-        'number.base': 'Voters should be a number',
-        'number.empty': 'Voters are required',
-        'any.required': 'Voters are required',
-      }),
     actors: Joi.string()
       .required()
       .messages({
@@ -321,7 +255,7 @@ const schema = {
         'any.required': 'Files are required',
       }),
     status: Joi.string()
-      .valid('Latest', 'Coming Soon')
+      .valid('Latest', 'Coming Soon', 'Featured movies')
       .required()
       .messages({
         'string.base': 'Status should be a type of text',
@@ -347,11 +281,12 @@ const schema = {
       .integer()
       .positive()
       .required(),
-    showTime: Joi.string()
+    showTime: Joi.date()
       .required(),
   }),
   sendEmail: Joi.object({
     email: Joi.string()
+      .trim()
       .email()
       .required()
       .messages({
@@ -359,7 +294,8 @@ const schema = {
         'string.empty': 'Email is required',
       }),
     message: Joi.string()
-      .min(20)
+      .trim()
+      .min(10)
       .required()
       .messages({
         'string.empty': 'Message must not be empty',

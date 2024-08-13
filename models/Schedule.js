@@ -12,7 +12,7 @@ Schedule.init(
       primaryKey: true,
     },
     showTime: {
-      type: DataTypes.STRING,
+      type: DataTypes.DATE,
       allowNull: false,
     },
   },

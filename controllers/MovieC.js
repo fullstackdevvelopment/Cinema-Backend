@@ -1,5 +1,8 @@
 import HttpError from 'http-errors';
 import {
+  Op, Sequelize,
+} from 'sequelize';
+import {
   Actors,
   Bookings,
   Categories,
@@ -26,8 +29,18 @@ class MovieC {
   static async createMovie(req, res, next) {
     try {
       const {
-        title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors, stills, files, status,
+        title,
+        details,
+        language,
+        releaseDate,
+        director,
+        storyLine,
+        duration,
+        categories,
+        actors,
+        stills,
+        files,
+        status,
       } = req.body;
 
       const actorArray = JSON.parse(actors);
@@ -47,9 +60,9 @@ class MovieC {
         releaseDate,
         director,
         storyLine,
-        rating,
+        rating: 0,
         duration,
-        voters,
+        voters: 0,
         status,
       });
 
@@ -96,8 +109,18 @@ class MovieC {
   static async changeMovie(req, res, next) {
     try {
       const {
-        title, details, language, releaseDate, director, storyLine,
-        rating, duration, voters, categories, actors, stills, files, status,
+        title,
+        details,
+        language,
+        releaseDate,
+        director,
+        storyLine,
+        duration,
+        categories,
+        actors,
+        stills,
+        files,
+        status,
       } = req.body;
 
       const { movieId } = req.params;
@@ -153,9 +176,7 @@ class MovieC {
         releaseDate,
         director,
         storyLine,
-        rating,
         duration,
-        voters,
         status,
       });
       const newPhotos = await Photos.create({
@@ -234,20 +255,48 @@ class MovieC {
       const transaction = await sequelize.transaction();
 
       try {
-        await Movies.destroy({ where: { id: movieId }, transaction });
-        await Photos.destroy({ where: { movieId }, transaction });
-        await Trailers.destroy({ where: { movieId }, transaction });
-        await Actors.destroy({ where: { movieId }, transaction });
-        await MovieCategories.destroy({ where: { movieId }, transaction });
-        await MovieStills.destroy({ where: { movieId }, transaction });
-        await Bookings.destroy({ where: { movieId }, transaction });
-        await Comments.destroy({ where: { movieId }, transaction });
-        await Schedule.destroy({ where: { movieId }, transaction });
+        await Movies.destroy({
+          where: { id: movieId },
+          transaction,
+        });
+        await Photos.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await Trailers.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await Actors.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await MovieCategories.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await MovieStills.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await Bookings.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await Comments.destroy({
+          where: { movieId },
+          transaction,
+        });
+        await Schedule.destroy({
+          where: { movieId },
+          transaction,
+        });
 
         await transaction.commit();
-        res.status(200).json({
-          message: 'Movie deleted successfully!',
-        });
+        res.status(200)
+          .json({
+            message: 'Movie deleted successfully!',
+          });
       } catch (error) {
         await transaction.rollback();
         throw error;
@@ -260,11 +309,7 @@ class MovieC {
   // ***** GET MOVIE LIST API ONLY FOR ADMIN *****
   static async getMovieList(req, res, next) {
     try {
-      const { page = 1, limit = 6 } = req.query;
-
-      const count = await Movies.count();
-
-      const list = await Movies.findAll({
+      const movies = await Movies.findAll({
         include: [
           {
             model: Photos,
@@ -288,8 +333,128 @@ class MovieC {
           },
         ],
       });
+      const list = {};
+      list.listFilterByLatest = movies.filter((item) => item.status === 'Latest');
+      list.listFilterByComingSoon = movies.filter((item) => item.status === 'Coming Soon');
+      list.listFilterByFeaturedMovies = movies.filter((item) => item.status === 'Featured movies');
+      list.allMovies = movies;
 
-      const totalPages = Math.ceil(count / limit);
+      res.json({
+        list,
+        status: 'ok',
+      });
+    } catch (e) {
+      console.log(e);
+      next(e);
+    }
+  }
+
+  static async getFilteredMovieList(req, res, next) {
+    try {
+      const {
+        limit = 9,
+        s = '',
+        filterBy = 'title',
+        sortOrder = 'ASC',
+        title = '',
+        categoryIds = '',
+        countries = '',
+        years = '',
+      } = req.query;
+      let { page = 1 } = req.query;
+
+      if (title || categoryIds || countries || years) {
+        page = 1;
+      }
+
+      const categoryIdsArray = Array.isArray(categoryIds)
+        ? categoryIds.map((id) => parseInt(id, 10)).filter((id) => !Number.isNaN(id))
+        : [parseInt(categoryIds, 10)].filter((id) => !Number.isNaN(id));
+
+      const countriesArray = Array.isArray(countries)
+        ? countries.map((country) => country.trim()).filter(Boolean)
+        : [countries.trim()].filter(Boolean);
+
+      const yearsArray = Array.isArray(years)
+        ? years.map((year) => parseInt(year, 10)).filter((year) => !Number.isNaN(year))
+        : [parseInt(years, 10)].filter((year) => !Number.isNaN(year));
+
+      const parsedPage = parseInt(page, 10);
+      const parsedLimit = parseInt(limit, 10);
+      const parsedSortOrder = sortOrder.toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+      const where = {
+        [Op.and]: [],
+      };
+
+      if (s) {
+        where[Op.and].push({
+          [Op.or]: [
+            { title: { [Op.like]: `%${s}%` } },
+            { releaseDate: { [Op.like]: `%${s}%` } },
+            { details: { [Op.like]: `%${s}%` } },
+          ],
+        });
+      }
+
+      if (title) {
+        where[Op.and].push({ title: { [Op.like]: `%${title}%` } });
+      }
+
+      if (countriesArray.length > 0) {
+        where[Op.and].push({
+          [Op.or]: countriesArray.map((country) => ({
+            details: { [Op.like]: `%${country}%` },
+          })),
+        });
+      }
+
+      if (yearsArray.length > 0) {
+        where[Op.and].push(
+          Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('releaseDate')), {
+            [Op.in]: yearsArray,
+          }),
+        );
+      }
+
+      const include = [];
+
+      if (categoryIdsArray.length > 0) {
+        include.push({
+          model: Categories,
+          as: 'categories',
+          attributes: ['id', 'name'],
+          where: { id: { [Op.in]: categoryIdsArray } },
+        });
+      }
+
+      const list = await Movies.findAll({
+        where,
+        attributes: ['id', 'title', 'rating', 'voters', 'releaseDate'],
+        include: [
+          ...include,
+          {
+            model: Photos,
+            as: 'photos',
+            attributes: ['id', 'moviePhoto'],
+          },
+          {
+            model: Categories,
+            as: 'categories',
+            attributes: ['id', 'name'],
+          },
+        ],
+        order: [[filterBy, parsedSortOrder]],
+        limit: parsedLimit,
+        offset: (parsedPage - 1) * parsedLimit,
+      });
+
+      const count = await Movies.count({
+        where,
+        include,
+      });
+
+      const totalPages = Math.ceil(count / parsedLimit);
 
       list.forEach((movie) => {
         if (movie.stills) {
@@ -299,11 +464,12 @@ class MovieC {
 
       res.json({
         list,
-        limit,
-        page,
+        limit: parsedLimit,
+        page: parsedPage,
         totalPages,
       });
     } catch (e) {
+      console.log(e);
       next(e);
     }
   }
@@ -419,7 +585,8 @@ class MovieC {
       const countrySet = new Set();
 
       movies.forEach((movie) => {
-        const countries = movie.details.split(',').map((country) => country.trim());
+        const countries = movie.details.split(',')
+          .map((country) => country.trim());
         countries.forEach((country) => {
           countrySet.add(country);
         });

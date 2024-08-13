@@ -20,6 +20,9 @@ router.post('/login', UserC.loginAdmin);
 // ***** ADMIN DATA *****
 router.get('/data', isAdminM, UserC.adminData);
 
+// ***** DELETE USER *****
+router.put('/delete/:userId', isAdminM, UserC.deleteUser)
+;
 // ***** SCHEDULE API *****
 router.get('/schedule/list', isAdminM, ScheduleC.scheduleList);
 router.post('/schedule/create', isAdminM, validateM(schema.createSchedule), ScheduleC.createSchedule);

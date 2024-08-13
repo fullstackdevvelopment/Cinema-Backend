@@ -1,7 +1,6 @@
 import {
   Users,
   Movies,
-  Cards,
   Comments,
   Bookings,
   Categories,
@@ -14,7 +13,6 @@ import {
 
 async function main() {
   await Users.sync({ alter: true, logging: true });
-  await Cards.sync({ alter: true, logging: true });
   await Movies.sync({ alter: true, logging: true });
   await Comments.sync({ alter: true, logging: true });
   await Bookings.sync({ alter: true, logging: true });

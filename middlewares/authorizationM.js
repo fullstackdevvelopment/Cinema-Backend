@@ -8,6 +8,7 @@ const EXCLUDE = [
   'POST:/admins/login',
   'GET:/schedule/list',
   'GET:/movie/list',
+  'GET:/movie/list/filtered',
   'GET:/movie/countries',
   'GET:/category/list',
   'GET:/schedule/list',

@@ -15,6 +15,7 @@ class PaymentService {
       const paymentIntent = await stripe.paymentIntents.create({
         amount,
         currency,
+        payment_method_types: ['card'],
       });
 
       const payment = await Payment.create({
@@ -28,6 +29,32 @@ class PaymentService {
       return { clientSecret: paymentIntent.client_secret, payment };
     } catch (error) {
       throw new Error(`Failed to create payment intent: ${error.message}`);
+    }
+  }
+
+  static async createCheckoutSession(amount, currency, userId) {
+    try {
+      const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [{
+          price_data: {
+            currency,
+            product_data: {
+              name: 'Your Product Name',
+            },
+            unit_amount: amount,
+          },
+          quantity: 1,
+        }],
+        mode: 'payment',
+        success_url: `${process.env.CLIENT_BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${process.env.CLIENT_BASE_URL}/cancel`,
+        metadata: { userId },
+      });
+
+      return { sessionId: session.id };
+    } catch (error) {
+      throw new Error(`Failed to create checkout session: ${error.message}`);
     }
   }
 
@@ -47,22 +74,14 @@ class PaymentService {
     }
   }
 
-  // static async getPaymentById(paymentId) {
-  //   try {
-  //     const payment = await Payment.findByPk(paymentId);
-  //     if (!payment) {
-  //       throw new Error('Payment not found');
-  //     }
-  //
-  //     return payment;
-  //   } catch (error) {
-  //     throw new Error(`Failed to get payment: ${error.message}`);
-  //   }
-  // }
-
   static async handleStripeWebhook(event) {
     try {
       switch (event.type) {
+        case 'checkout.session.completed':
+          // eslint-disable-next-line no-case-declarations
+          const session = event.data.object;
+          await this.updatePaymentStatus(session.id, 'succeeded');
+          break;
         case 'payment_intent.succeeded':
           // eslint-disable-next-line no-case-declarations
           const paymentIntent = event.data.object;

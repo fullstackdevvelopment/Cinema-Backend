@@ -15,13 +15,13 @@ class CommentC {
       }
 
       const user = await Users.findByPk(userId);
-      const movies = await Movies.findByPk(movieId);
+      const movie = await Movies.findByPk(movieId);
 
       if (!user) {
         throw HttpError(404, 'User not found');
       }
 
-      if (!movies) {
+      if (!movie) {
         throw HttpError(404, 'Movie not found');
       }
 
@@ -32,9 +32,22 @@ class CommentC {
         movieId,
       });
 
+      const newVotersCount = movie.voters + 1;
+      const newRating = (movie.rating * movie.voters + rating) / newVotersCount;
+      console.log(newVotersCount);
+      console.log(movie.voters);
+      console.log(movie.rating);
+      console.log(rating);
+
+      await movie.update({
+        voters: newVotersCount,
+        rating: newRating,
+      });
+
       res.json({
         status: 'Success',
         newComment,
+        movie,
       });
     } catch (e) {
       console.log(e);
@@ -45,7 +58,10 @@ class CommentC {
   // ***** API FOR GET LIST COMMENT *****
   static async getCommentList(req, res, next) {
     try {
-      const { page = 1, limit = 4 } = req.query;
+      const {
+        page = 1,
+        limit = 4,
+      } = req.query;
       const count = await Comments.count();
 
       const list = await Comments.findAll({

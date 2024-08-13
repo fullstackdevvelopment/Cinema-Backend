@@ -3,7 +3,7 @@ import HttpError from 'http-errors';
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import {
-  Users, Cards, Bookings, PendingUsers, PendingPassword,
+  Users, Bookings, PendingUsers, PendingPassword,
 } from '../models/index.js';
 import EmailC from './EmailC.js';
 
@@ -27,11 +27,6 @@ class UserC {
         address,
         phone,
         isAdmin,
-        cardNumber,
-        selectedMonth,
-        selectedYear,
-        cvv,
-        cardHolderName,
       } = req.body;
 
       const { file } = req;
@@ -39,10 +34,16 @@ class UserC {
       const photoUrl = file.filename;
 
       const errors = [];
+      let existingUserByUserName;
+      let existingUserByEmail;
 
-      const existingUserByUserName = await Users.findOne({ where: { userName } });
-      const existingUserByEmail = await Users.findOne({ where: { email } });
-      const existingUserByPhone = await Users.findOne({ where: { phone } });
+      if (userName) {
+        existingUserByUserName = await Users.findOne({ where: { userName } });
+      }
+
+      if (email) {
+        existingUserByEmail = await Users.findOne({ where: { email } });
+      }
 
       if (existingUserByUserName) {
         errors.push({
@@ -58,21 +59,15 @@ class UserC {
         });
       }
 
-      if (existingUserByPhone) {
-        errors.push({
-          field: 'phone',
-          message: 'Phone already exists',
-        });
-      }
-
       if (errors.length > 0) {
         throw HttpError(422, { errors });
       }
 
       const passwordHash = md5(md5(password) + USER_PASSWORD_HASH);
-      const expirationDate = `${selectedMonth}/${selectedYear}`;
 
-      const verificationCode = randomBytes(6).toString('hex').slice(0, 6);
+      const verificationCode = randomBytes(6)
+        .toString('hex')
+        .slice(0, 6);
 
       const user = await PendingUsers.create({
         firstName,
@@ -80,19 +75,15 @@ class UserC {
         userName,
         email,
         password: passwordHash,
-        city,
-        country,
-        address,
-        phone,
+        city: city || '',
+        country: country || '',
+        address: address || '',
+        phone: phone || '+374',
         photo: photoUrl,
         isAdmin,
         status: 'pending',
         verificationCode,
         expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
-        cardNumber,
-        expirationDate,
-        cvv,
-        cardHolderName,
       });
 
       const message = await EmailC.emailVerification(email, verificationCode);
@@ -114,10 +105,11 @@ class UserC {
       const pendingUser = await PendingUsers.findOne({ where: { verificationCode } });
 
       if (!pendingUser || new Date() > new Date(pendingUser.expiresAt)) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Invalid or expired verification code',
-        });
+        res.status(400)
+          .json({
+            status: 'error',
+            message: 'Invalid or expired verification code',
+          });
       }
 
       const user = await Users.create({
@@ -134,22 +126,12 @@ class UserC {
         status: 'active',
       });
 
-      const userCard = await Cards.create({
-        cardNumber: pendingUser.cardNumber,
-        expirationDate: pendingUser.expirationDate,
-        cvv: pendingUser.cvv,
-        cardHolderName: pendingUser.cardHolderName,
-        userId: user.id,
-        balance: 50000,
-      });
-
       await PendingUsers.destroy({ where: { verificationCode } });
 
       res.json({
         status: 'success',
         message: 'Email verified and user registered successfully',
         user,
-        userCard,
       });
     } catch (e) {
       next(e);
@@ -167,12 +149,15 @@ class UserC {
       });
 
       if (!user) {
-        res.status(400).json({
-          status: 'error',
-          message: 'User not found',
-        });
+        res.status(400)
+          .json({
+            status: 'error',
+            message: 'User not found',
+          });
       }
-      const verificationCode = randomBytes(6).toString('hex').slice(0, 6);
+      const verificationCode = randomBytes(6)
+        .toString('hex')
+        .slice(0, 6);
 
       await EmailC.resetPassword(email, verificationCode);
 
@@ -199,10 +184,11 @@ class UserC {
       const pendingCode = await PendingPassword.findOne({ where: { verificationCode } });
 
       if (!pendingCode || new Date() > new Date(pendingCode.expiresAt)) {
-        res.status(400).json({
-          status: 'error',
-          message: 'Invalid or expired verification code',
-        });
+        res.status(400)
+          .json({
+            status: 'error',
+            message: 'Invalid or expired verification code',
+          });
       }
 
       const user = await Users.findOne({
@@ -226,10 +212,11 @@ class UserC {
       const { email } = req.body;
       const { file } = req;
       if (!file) {
-        res.status(400).json({
-          status: 'error',
-          message: 'No file uploaded',
-        });
+        res.status(400)
+          .json({
+            status: 'error',
+            message: 'No file uploaded',
+          });
       }
 
       console.log(email);
@@ -240,6 +227,29 @@ class UserC {
         status: 'ok',
       });
     } catch (e) {
+      next(e);
+    }
+  }
+
+  static async deleteUser(req, res, next) {
+    try {
+      const { userId } = req.params;
+
+      const user = await Users.findOne({
+        where: { id: userId },
+      });
+
+      if (user) {
+        await user.destroy();
+      } else {
+        throw HttpError(404, 'User not found');
+      }
+      res.json({
+        status: 'ok',
+        message: 'User deleted successfully',
+      });
+    } catch (e) {
+      console.log(e);
       next(e);
     }
   }
@@ -333,12 +343,7 @@ class UserC {
       const decodedToken = jwt.verify(token, USER_JWT_SECRET);
       const { userId } = decodedToken;
 
-      const user = await Users.findByPk(userId, {
-        include: {
-          model: Cards,
-          as: 'cards',
-        },
-      });
+      const user = await Users.findByPk(userId, {});
 
       if (!user) {
         throw new HttpError(404, 'User Not Found');
@@ -363,10 +368,6 @@ class UserC {
         attributes: {
           exclude: ['password', 'isAdmin'],
         },
-        include: {
-          model: Cards,
-          as: 'cards',
-        },
       });
 
       if (!user) {
@@ -384,7 +385,10 @@ class UserC {
   // ***** USER LIST API FOR ADMIN *****
   static async userList(req, res, next) {
     try {
-      const { page = 1, limit = 6 } = req.query;
+      const {
+        page = 1,
+        limit = 6,
+      } = req.query;
       const count = await Users.count({
         where: {
           isAdmin: false,
@@ -427,13 +431,29 @@ class UserC {
         country,
         address,
         phone,
+        currentPassword,
+        newPassword,
       } = req.body;
 
-      const { file, userId } = req;
+      const {
+        file,
+        userId,
+      } = req;
 
       const photoUrl = file?.filename;
 
       const user = await Users.findByPk(userId);
+      const errors = {};
+      let hashedPassword;
+      let newHashedPassword;
+      let status;
+      if (currentPassword) {
+        hashedPassword = md5(md5(currentPassword) + USER_PASSWORD_HASH);
+      }
+      if (newPassword) {
+        newHashedPassword = md5(md5(newPassword) + USER_PASSWORD_HASH);
+      }
+
       if (user) {
         user.firstName = firstName || user.firstName;
         user.lastName = lastName || user.lastName;
@@ -444,14 +464,23 @@ class UserC {
         user.phone = phone || user.phone;
         user.photo = photoUrl || user.photo;
         user.updatedAt = new Date();
+        if (hashedPassword && user.password !== hashedPassword) {
+          res.status(403).json(errors.currentPassword = 'Wrong password');
+        } else if (newHashedPassword) {
+          user.password = newHashedPassword;
+          status = 'Password update';
+        } else {
+          status = 'Data update';
+        }
 
         const updatedUser = await user.save();
         res.json({
           message: 'User data updated successfully',
           updatedUser,
+          status,
         });
       } else {
-        throw HttpError(404, 'User not found');
+        throw HttpError(404, 'Invalid password or user');
       }
     } catch (e) {
       next(e);

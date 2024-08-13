@@ -26,10 +26,6 @@ PendingUsers.init(
     status: DataTypes.STRING,
     verificationCode: DataTypes.STRING,
     expiresAt: DataTypes.DATE,
-    cardNumber: DataTypes.STRING,
-    expirationDate: DataTypes.STRING,
-    cvv: DataTypes.STRING,
-    cardHolderName: DataTypes.STRING,
   },
   {
     sequelize,
