@@ -61,32 +61,36 @@ const schema = {
     city: Joi.string()
       .trim()
       .min(2)
+      .allow('')
       .messages({
         'string.empty': 'City must not be empty',
+        'string.min': 'City must be at least 2 characters long',
       }),
 
     country: Joi.string()
       .trim()
       .min(2)
+      .allow('')
       .messages({
         'string.empty': 'Country must not be empty',
+        'string.min': 'Country must be at least 2 characters long',
       }),
 
     address: Joi.string()
       .trim()
       .min(2)
+      .allow('')
       .messages({
         'string.empty': 'Address must not be empty',
+        'string.min': 'Address must be at least 2 characters long',
       }),
 
     phone: Joi.string()
       .trim()
-      .length(12)
-      .pattern(/^\+374\d{8}$/)
+      .pattern(/^\+374(\d{8})?$/)
       .messages({
         'string.empty': 'Phone number must not be empty',
-        'string.length': 'The phone number must contain exactly 12 characters',
-        'string.pattern.base': 'Phone number must start with +374 and contain 8 digits after the country code',
+        'string.pattern.base': 'Phone number must start with +374 and optionally contain 8 digits after the country code',
       }),
   }),
   updateUser: Joi.object({
