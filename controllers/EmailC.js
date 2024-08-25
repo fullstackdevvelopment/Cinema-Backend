@@ -21,6 +21,7 @@ class EmailC {
   static async sendEmail(req, res, next) {
     try {
       const { email, message } = req.body;
+      console.log(req.body);
       const info = await transporter.sendMail({
         from: SMTP_MAIL,
         to: SMTP_MAIL,
@@ -103,6 +104,7 @@ class EmailC {
     }
   }
 
+  // eslint-disable-next-line consistent-return
   static async sendPdfTicket(email, file) {
     try {
       const info = await transporter.sendMail({

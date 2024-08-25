@@ -302,6 +302,21 @@ const schema = {
         'string.min': 'Message must contain at least 10 character',
       }),
   }),
+  createComment: Joi.object({
+    rating: Joi.number()
+      .required()
+      .messages({
+        'string.rating': 'Rating must be a number',
+      }),
+    commentText: Joi.string()
+      .trim()
+      .min(10)
+      .required()
+      .messages({
+        'string.empty': 'Message must not be empty',
+        'string.min': 'Message must contain at least 10 character',
+      }),
+  }),
   resetPassword: Joi.object({
     email: Joi.string()
       .email()

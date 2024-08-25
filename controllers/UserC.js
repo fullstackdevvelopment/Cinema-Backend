@@ -33,7 +33,7 @@ class UserC {
 
       const photoUrl = file.filename;
 
-      const errors = [];
+      const errors = {};
       let existingUserByUserName;
       let existingUserByEmail;
 
@@ -46,20 +46,14 @@ class UserC {
       }
 
       if (existingUserByUserName) {
-        errors.push({
-          field: 'userName',
-          message: 'UserName already exists',
-        });
+        errors.userName = 'UserName already exists';
       }
 
       if (existingUserByEmail) {
-        errors.push({
-          field: 'email',
-          message: 'Email already exists',
-        });
+        errors.email = 'Email already exists';
       }
 
-      if (errors.length > 0) {
+      if (Object.keys(errors).length > 0) {
         throw HttpError(422, { errors });
       }
 
